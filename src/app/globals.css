@@ -1,0 +1,96 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  color-scheme: light;
+  background: #f8f7f4;
+  color: #252525;
+}
+
+.dark {
+  color-scheme: dark;
+  background: #181817;
+  color: #f8f7f4;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  height: 100%;
+  overflow: hidden;
+}
+
+body {
+  margin: 0;
+  height: 100%;
+  overflow: hidden;
+  background:
+    radial-gradient(circle at 82% 8%, rgba(255, 255, 255, 0.85), transparent 9rem),
+    radial-gradient(circle at 18% 18%, rgba(255, 255, 255, 0.72), transparent 11rem),
+    linear-gradient(135deg, #eeeeec 0%, #f8f8f6 48%, #e8e8e5 100%);
+  font-feature-settings: "kern";
+}
+
+button,
+input,
+textarea,
+select {
+  font: inherit;
+}
+
+.dark body {
+  background: linear-gradient(180deg, #181817 0%, #242320 100%);
+}
+
+@layer components {
+  .ao-shell {
+    height: 100dvh;
+    height: 100svh;
+    @apply mx-auto flex w-full max-w-md items-center justify-center overflow-hidden px-3 py-3;
+  }
+
+  .ao-phone {
+    height: calc(100dvh - 1.5rem);
+    height: calc(100svh - 1.5rem);
+    max-height: 932px;
+    @apply relative w-full overflow-hidden rounded-[34px] bg-white px-5 pb-24 pt-5 shadow-journal;
+  }
+
+  @media (display-mode: standalone), (max-width: 520px) {
+    .ao-shell {
+      @apply max-w-none px-0 py-0;
+    }
+
+    .ao-phone {
+      height: 100dvh;
+      height: 100svh;
+      @apply max-h-none max-w-none rounded-none shadow-none;
+      padding-top: calc(env(safe-area-inset-top, 0px) + 1.25rem);
+      padding-bottom: calc(env(safe-area-inset-bottom, 0px) + 6rem);
+    }
+  }
+
+  .ao-phone::before {
+    content: "";
+    @apply absolute left-1/2 top-3 h-1.5 w-20 -translate-x-1/2 rounded-full bg-black/5;
+  }
+
+  .ao-card {
+    @apply rounded-[5px] border border-black/[0.03] bg-white shadow-[0_14px_34px_rgba(34,34,34,0.08)] backdrop-blur dark:border-white/10 dark:bg-white/10;
+  }
+
+  .ao-input {
+    @apply w-full rounded-2xl border border-mist bg-white/80 px-4 py-3 text-sm outline-none transition focus:border-graphite dark:border-white/10 dark:bg-white/10;
+  }
+
+  .ao-button {
+    @apply inline-flex items-center justify-center gap-2 rounded-full bg-ink px-5 py-3 text-sm font-semibold text-white transition hover:-translate-y-0.5 hover:shadow-soft disabled:cursor-not-allowed disabled:opacity-60 dark:bg-white dark:text-ink;
+  }
+
+  .ao-icon-button {
+    @apply inline-flex h-11 w-11 items-center justify-center rounded-full bg-white text-ink shadow-none transition hover:-translate-y-0.5 active:scale-95 dark:bg-white/10 dark:text-white;
+  }
+}

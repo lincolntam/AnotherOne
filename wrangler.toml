@@ -1,0 +1,22 @@
+name = "anotherone"
+main = ".open-next/worker.js"
+compatibility_date = "2026-07-03"
+compatibility_flags = ["nodejs_compat", "global_fetch_strictly_public"]
+
+[assets]
+directory = ".open-next/assets"
+binding = "ASSETS"
+
+[[services]]
+binding = "WORKER_SELF_REFERENCE"
+service = "anotherone"
+
+[[d1_databases]]
+binding = "DB"
+database_name = "global_login"
+database_id = "6f542b4b-2d77-4eaf-a0d3-b5038039bae7"
+
+[vars]
+NEXT_PUBLIC_APP_NAME = "AnotherOne"
+SESSION_COOKIE_NAME = "ao_session"
+SESSION_TTL_DAYS = "7"

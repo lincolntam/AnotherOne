@@ -1,0 +1,72 @@
+import type { WebsiteShortcut } from "@/types/app";
+
+export const privateShortcuts: WebsiteShortcut[] = [
+  {
+    id: "private-vault",
+    userId: "secret",
+    title: "Private Vault",
+    description: "Sensitive links and quiet notes.",
+    url: "https://example.com/private-vault",
+    imageUrl: "",
+    category: "Secret",
+    displayOrder: 1,
+    active: true,
+    favorite: true,
+    pinned: true,
+    clickCount: 0,
+    lastUsedAt: null,
+    createdAt: "2026-07-03T00:00:00.000Z",
+    updatedAt: "2026-07-03T00:00:00.000Z"
+  },
+  {
+    id: "private-research",
+    userId: "secret",
+    title: "Research",
+    description: "Private browsing workspace.",
+    url: "https://duckduckgo.com",
+    imageUrl: "",
+    category: "Browse",
+    displayOrder: 2,
+    active: true,
+    favorite: true,
+    pinned: true,
+    clickCount: 0,
+    lastUsedAt: null,
+    createdAt: "2026-07-03T00:00:00.000Z",
+    updatedAt: "2026-07-03T00:00:00.000Z"
+  },
+  {
+    id: "private-files",
+    userId: "secret",
+    title: "Hidden Files",
+    description: "Reserved area for encrypted documents.",
+    url: "https://example.com/hidden-files",
+    imageUrl: "",
+    category: "Files",
+    displayOrder: 3,
+    active: true,
+    favorite: true,
+    pinned: false,
+    clickCount: 0,
+    lastUsedAt: null,
+    createdAt: "2026-07-03T00:00:00.000Z",
+    updatedAt: "2026-07-03T00:00:00.000Z"
+  },
+  {
+    id: "private-notes",
+    userId: "secret",
+    title: "Hidden Notes",
+    description: "Draft thoughts without analytics.",
+    url: "https://example.com/hidden-notes",
+    imageUrl: "",
+    category: "Notes",
+    displayOrder: 4,
+    active: true,
+    favorite: false,
+    pinned: false,
+    clickCount: 0,
+    lastUsedAt: null,
+    createdAt: "2026-07-03T00:00:00.000Z",
+    updatedAt: "2026-07-03T00:00:00.000Z"
+  }
+];
