@@ -108,7 +108,14 @@ export default function AnotherWMPage() {
               onSubmit={saveUrl}
             >
               <div className="flex items-center gap-3 rounded-full bg-paper px-4 py-3">
-                {saving ? <Loader2 className="animate-spin" size={18} /> : <Plus size={18} />}
+                <button
+                  type="submit"
+                  aria-label="Save source URL"
+                  disabled={saving || !url.trim()}
+                  className="inline-flex h-5 w-5 shrink-0 items-center justify-center text-ink transition disabled:opacity-35"
+                >
+                  {saving ? <Loader2 className="animate-spin" size={18} /> : <Plus size={18} />}
+                </button>
                 <input
                   className="w-full bg-transparent text-sm outline-none"
                   autoFocus

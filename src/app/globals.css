@@ -60,8 +60,13 @@ select {
   }
 
   @media (display-mode: standalone), (max-width: 520px) {
+    html,
+    body {
+      background: #fff;
+    }
+
     .ao-shell {
-      @apply max-w-none px-0 py-0;
+      @apply max-w-none bg-white px-0 py-0;
     }
 
     .ao-phone {
