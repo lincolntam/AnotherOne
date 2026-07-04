@@ -10,6 +10,9 @@ import { api } from "@/lib/api";
 import type { WatchlistItem } from "@/types/watchlist";
 import { findWatchlistItem, upsertWatchlistItem } from "@/utils/watchlist-storage";
 
+const actressTitle = "\u5973\u512a";
+const genreTitle = "\u985e\u578b";
+
 export default function AnotherWMDetailPage() {
   const params = useParams<{ id: string }>();
   const router = useRouter();
@@ -33,6 +36,17 @@ export default function AnotherWMDetailPage() {
         .catch(() => findWatchlistItem(id));
 
       if (saved) {
+        if (shouldRefresh(saved)) {
+          const refreshed = await refreshWatchlistItem(saved).catch(() => null);
+          if (refreshed) {
+            if (!cancelled) {
+              setItem(refreshed);
+              setLoading(false);
+            }
+            return;
+          }
+        }
+
         if (!cancelled) {
           setItem(saved);
           setLoading(false);
@@ -95,10 +109,8 @@ export default function AnotherWMDetailPage() {
     <AppShell showHeader={false} showBottomNav={false}>
       <article className="min-h-[680px] overflow-hidden rounded-[34px] bg-white text-ink">
         <div className="relative h-[245px] w-full bg-paper">
-          {item.previewUrl ? (
-            <video className="h-full w-full object-cover" src={item.previewUrl} poster={item.coverUrl || undefined} controls muted playsInline />
-          ) : item.coverUrl ? (
-            <Image src={item.coverUrl} alt="" fill className="object-cover" unoptimized />
+          {item.coverUrl ? (
+            <Image src={proxiedImageUrl(item.coverUrl)} alt="" fill className="object-cover" unoptimized />
           ) : (
             <div className="h-full w-full bg-[linear-gradient(135deg,#f5f1e9,#dfe8e9)]" />
           )}
@@ -122,11 +134,11 @@ export default function AnotherWMDetailPage() {
             <InfoPill icon={<ExternalLink size={15} />} label={item.site} />
           </div>
 
-          <MetaSection icon={<UserRound size={16} />} title="女優">
+          <MetaSection icon={<UserRound size={16} />} title={actressTitle}>
             {item.actresses.map((person) => <MetaLink key={person.name} name={person.name} url={person.url} />)}
           </MetaSection>
 
-          <MetaSection icon={<Tag size={16} />} title="類型">
+          <MetaSection icon={<Tag size={16} />} title={genreTitle}>
             {item.genres.map((genre) => <MetaLink key={genre.name} name={genre.name} url={genre.url} />)}
           </MetaSection>
 
@@ -143,6 +155,27 @@ function createSourceUrl(id: string) {
   const normalized = id.trim().toLowerCase();
   if (/^https?:\/\//u.test(normalized)) return normalized;
   return `https://missav.ws/${normalized}`;
+}
+
+async function refreshWatchlistItem(item: WatchlistItem) {
+  const fetched = await api<WatchlistItem>("/api/secret/watchlist/metadata", {
+    method: "POST",
+    body: JSON.stringify({ url: item.sourceUrl })
+  });
+  await api<WatchlistItem>("/api/secret/watchlist", {
+    method: "POST",
+    body: JSON.stringify(fetched)
+  });
+  upsertWatchlistItem(fetched);
+  return fetched;
+}
+
+function shouldRefresh(item: WatchlistItem) {
+  return !item.coverUrl || !item.releaseDate || !item.genres.length || item.actresses.some((person) => /ranking|排行/iu.test(`${person.name} ${person.url || ""}`));
+}
+
+function proxiedImageUrl(value: string) {
+  return `/api/secret/watchlist/image?url=${encodeURIComponent(value)}`;
 }
 
 function InfoPill({ icon, label }: { icon: React.ReactNode; label: string }) {

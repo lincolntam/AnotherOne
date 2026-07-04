@@ -157,7 +157,7 @@ function toShortcutCards(items: WatchlistItem[]): WebsiteShortcut[] {
     title: item.code || item.title,
     description: item.title,
     url: `/secret/anotherwm/list/${encodeURIComponent(item.id)}`,
-    imageUrl: item.coverUrl,
+    imageUrl: item.coverUrl ? proxiedImageUrl(item.coverUrl) : "",
     category: "AnotherWM",
     displayOrder: index + 1,
     active: true,
@@ -168,4 +168,8 @@ function toShortcutCards(items: WatchlistItem[]): WebsiteShortcut[] {
     createdAt: item.savedAt,
     updatedAt: item.savedAt
   }));
+}
+
+function proxiedImageUrl(value: string) {
+  return `/api/secret/watchlist/image?url=${encodeURIComponent(value)}`;
 }

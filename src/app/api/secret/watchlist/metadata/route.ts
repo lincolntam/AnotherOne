@@ -3,7 +3,10 @@ import { handleApiError } from "@/lib/api-errors";
 import { requireUser } from "@/services/auth-service";
 import type { WatchlistGenre, WatchlistItem, WatchlistPerson } from "@/types/watchlist";
 
-const allowedHosts = ["missav.ws", "jable.tv", "fourhoi.com"];
+const actressLabel = "\u5973\u512a";
+const genreLabel = "\u985e\u578b";
+const releaseDateLabel = "\u767c\u884c\u65e5\u671f";
+const allowedHosts = ["missav.ws", "missav.live", "jable.tv", "fourhoi.com"];
 
 export async function POST(request: Request) {
   try {
@@ -38,21 +41,17 @@ export async function POST(request: Request) {
 
       const html = await response.text();
       const title = cleanText(extractMeta(html, "og:title") || extractTag(html, "h1") || extractTitle(html) || fallback.title);
-      const coverUrl = absolutize(extractCoverImage(html) || extractMeta(html, "og:image") || extractLinkImage(html) || "", parsed);
       const code = extractCode(`${parsed.pathname} ${title}`) || fallback.code;
-      const labelActresses = extractLabelLinks<WatchlistPerson>(html, "女優", parsed);
-      const labelGenres = extractLabelLinks<WatchlistGenre>(html, "類型", parsed);
-
       const item: WatchlistItem = {
         id: createId(code, parsed.href),
         sourceUrl: parsed.href,
         site,
         title,
         code,
-        coverUrl,
+        coverUrl: absolutize(extractCoverImage(html) || extractMeta(html, "og:image") || extractLinkImage(html) || "", parsed),
         previewUrl: absolutize(extractMeta(html, "og:video") || extractMeta(html, "og:video:url") || extractMeta(html, "og:video:secure_url") || "", parsed),
-        actresses: uniqueByName(labelActresses.length ? labelActresses : extractLinkedLabels(html, /href=["']([^"']*\/actresses\/[^"']*)["'][^>]*>([\s\S]*?)<\/a>/giu, parsed)),
-        genres: uniqueByName(labelGenres.length ? labelGenres : extractLinkedLabels(html, /href=["']([^"']*\/genres\/[^"']*)["'][^>]*>([\s\S]*?)<\/a>/giu, parsed)),
+        actresses: uniqueByName(extractLabelLinks<WatchlistPerson>(html, actressLabel, parsed)),
+        genres: uniqueByName(extractLabelLinks<WatchlistGenre>(html, genreLabel, parsed)),
         releaseDate: extractReleaseDate(html),
         savedAt: new Date().toISOString()
       };
@@ -104,7 +103,7 @@ function createId(code: string, sourceUrl: string) {
 }
 
 function extractMeta(html: string, property: string) {
-  const escaped = property.replace(/[.*+?^${}()|[\]\\]/gu, "\\$&");
+  const escaped = escapeRegExp(property);
   const pattern = new RegExp(`<meta[^>]+(?:property|name)=["']${escaped}["'][^>]+content=["']([^"']+)["'][^>]*>`, "iu");
   return decodeHtml(pattern.exec(html)?.[1] || "");
 }
@@ -139,22 +138,12 @@ function extractCode(value: string) {
 }
 
 function extractReleaseDate(html: string) {
-  const labelledText = extractLabelText(html, "發行日期");
+  const labelledText = extractLabelText(html, releaseDateLabel);
   const labelled = /(\d{4}[-/]\d{1,2}[-/]\d{1,2})/u.exec(labelledText)?.[1];
   const normalized = stripTags(html).replace(/\s+/gu, " ");
-  const englishLabelled = /release date\s*[:：]?\s*(\d{4}[-/]\d{1,2}[-/]\d{1,2})/iu.exec(normalized)?.[1];
+  const englishLabelled = /release date\s*[:\uFF1A]?\s*(\d{4}[-/]\d{1,2}[-/]\d{1,2})/iu.exec(normalized)?.[1];
   const fallback = /(\d{4}[-/]\d{1,2}[-/]\d{1,2})/u.exec(normalized)?.[1];
   return (labelled || englishLabelled || fallback || "").replace(/\//gu, "-");
-}
-
-function extractLinkedLabels<T extends WatchlistPerson | WatchlistGenre>(html: string, pattern: RegExp, baseUrl: URL): T[] {
-  const items: T[] = [];
-  for (const match of html.matchAll(pattern)) {
-    const name = cleanText(decodeHtml(match[2] || ""));
-    if (!name) continue;
-    items.push({ name, url: absolutize(decodeHtml(match[1] || ""), baseUrl) } as T);
-  }
-  return items;
 }
 
 function extractLabelLinks<T extends WatchlistPerson | WatchlistGenre>(html: string, label: string, baseUrl: URL): T[] {
@@ -170,22 +159,46 @@ function extractLabelLinks<T extends WatchlistPerson | WatchlistGenre>(html: str
 
   if (linkedItems.length) return linkedItems;
 
-  return extractDelimitedNames(stripTags(segment)).map((name) => ({ name }) as T);
+  return extractDelimitedNames(stripTags(removeLabel(segment, label))).map((name) => ({ name }) as T);
 }
 
 function extractLabelText(html: string, label: string) {
-  return cleanText(decodeHtml(stripTags(extractLabelSegment(html, label))));
+  return cleanText(decodeHtml(stripTags(removeLabel(extractLabelSegment(html, label), label))));
 }
 
 function extractLabelSegment(html: string, label: string) {
-  const escaped = label.replace(/[.*+?^${}()|[\]\\]/gu, "\\$&");
-  const pattern = new RegExp(`<span[^>]*>\\s*${escaped}\\s*[:：]?\\s*<\\/span>([\\s\\S]*?)(?=<span[^>]*>|<\\/div>|<\\/p>|<\\/li>|<br\\s*\\/?>|$)`, "iu");
-  return pattern.exec(html)?.[1] || "";
+  const labelPattern = createLabelPattern(label);
+  const match = labelPattern.exec(html);
+  if (!match || match.index < 0) return "";
+
+  const labelIndex = match.index;
+  const divStart = html.lastIndexOf("<div", labelIndex);
+  const blockStart = divStart >= 0 ? divStart : labelIndex;
+  const divEnd = html.indexOf("</div>", labelIndex);
+  const blockEnd = divEnd >= 0 ? divEnd + "</div>".length : findNextKnownLabelIndex(html, labelIndex + match[0].length);
+  return html.slice(blockStart, blockEnd > blockStart ? blockEnd : html.length);
+}
+
+function createLabelPattern(label: string) {
+  return new RegExp(`(?:<span[^>]*>\\s*)?${escapeRegExp(label)}\\s*[:\\uFF1A]`, "iu");
+}
+
+function findNextKnownLabelIndex(html: string, fromIndex: number) {
+  const labels = [actressLabel, genreLabel, releaseDateLabel, "\u767c\u884c\u5546", "\u756a\u865f", "\u6a19\u7c64", "\u5c0e\u6f14"];
+  const indexes = labels
+    .map((label) => html.slice(fromIndex).search(createLabelPattern(label)))
+    .filter((index) => index >= 0)
+    .map((index) => fromIndex + index);
+  return indexes.length ? Math.min(...indexes) : html.length;
+}
+
+function removeLabel(value: string, label: string) {
+  return value.replace(createLabelPattern(label), "");
 }
 
 function extractDelimitedNames(value: string) {
   return cleanText(value)
-    .replace(/^\s*[:：]\s*/u, "")
+    .replace(/^\s*[:\uFF1A]\s*/u, "")
     .split(/[,，、]/u)
     .map((name) => cleanText(name))
     .filter(Boolean);
@@ -229,6 +242,10 @@ function stripTags(value: string) {
 
 function cleanText(value: string) {
   return stripTags(value).replace(/\s+/gu, " ").trim();
+}
+
+function escapeRegExp(value: string) {
+  return value.replace(/[.*+?^${}()|[\]\\]/gu, "\\$&");
 }
 
 function decodeHtml(value: string) {
