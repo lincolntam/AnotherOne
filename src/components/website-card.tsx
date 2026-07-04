@@ -19,7 +19,7 @@ export function WebsiteCard({ website, onOpen, compact = false, featured = false
   if (featured) {
     return (
       <motion.button
-        className="relative block h-[390px] w-full overflow-hidden rounded-[7px] bg-mist text-left shadow-[0_18px_36px_rgba(34,34,34,0.16)]"
+        className="relative block h-[390px] w-full overflow-hidden rounded-[7px] bg-mist text-left shadow-[0_18px_36px_rgba(34,34,34,0.16)] md:h-[420px]"
         whileHover={{ y: -4 }}
         whileTap={{ scale: 0.985 }}
         onClick={() => onOpen(website)}

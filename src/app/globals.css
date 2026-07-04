@@ -88,6 +88,23 @@ select {
     @apply pointer-events-none absolute left-1/2 top-3 h-1.5 w-20 -translate-x-1/2 rounded-full bg-black/5;
   }
 
+  @media (min-width: 900px) {
+    .ao-shell {
+      min-height: 100dvh;
+      @apply max-w-[1180px] items-center px-8 py-8;
+    }
+
+    .ao-phone {
+      min-height: min(820px, calc(100dvh - 4rem));
+      max-height: min(860px, calc(100dvh - 4rem));
+      @apply w-full max-w-none overflow-y-auto rounded-[34px] px-7 pb-24 pt-7;
+    }
+
+    .ao-phone::before {
+      @apply top-4;
+    }
+  }
+
   .ao-card {
     @apply rounded-[5px] border border-black/[0.03] bg-white shadow-[0_14px_34px_rgba(34,34,34,0.08)] backdrop-blur dark:border-white/10 dark:bg-white/10;
   }

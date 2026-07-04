@@ -109,25 +109,25 @@ export default function AnotherWMDetailPage() {
 
   return (
     <AppShell showHeader={false} showBottomNav={false}>
-      <article className="min-h-[680px] overflow-hidden rounded-[34px] bg-white text-ink">
-        <div className="relative h-[260px] w-full bg-paper">
+      <article className="min-h-[680px] overflow-hidden rounded-[34px] bg-white text-ink lg:grid lg:min-h-[640px] lg:grid-cols-[minmax(0,1.12fr)_minmax(360px,0.88fr)]">
+        <div className="relative h-[260px] w-full bg-paper lg:h-full lg:min-h-[640px]">
           <ExternalCoverImage src={item.coverUrl} />
           <Link href="/secret/anotherwm/list" aria-label="Back" className="absolute left-4 top-5 inline-flex h-10 w-10 items-center justify-center rounded-full bg-white/90 text-ink shadow-sm backdrop-blur">
             <ArrowLeft size={18} />
           </Link>
         </div>
 
-        <div className="space-y-5 px-7 py-6">
+        <div className="space-y-5 px-7 py-6 lg:flex lg:flex-col lg:justify-center lg:px-10 lg:py-10">
           <div className="flex items-center justify-center gap-2 text-[10px] font-bold uppercase tracking-[0.2em] text-graphite/45">
             <EyeOff size={14} />
             AnotherWM
           </div>
-          <div className="text-center">
+          <div className="text-center lg:text-left">
             <p className="text-[11px] font-bold uppercase tracking-[0.2em] text-graphite/45">{item.code ? `Code: ${item.code}` : item.site}</p>
             <h1 className="mt-3 text-lg font-bold leading-7 text-ink">{item.title}</h1>
           </div>
 
-          <div className="grid grid-cols-2 gap-3 text-xs text-graphite/70">
+          <div className="grid grid-cols-2 gap-3 text-xs text-graphite/70 lg:max-w-md">
             <InfoPill icon={<CalendarDays size={15} />} label={item.releaseDate || "No date"} />
             <InfoPill icon={<ExternalLink size={15} />} label={item.site} />
           </div>
@@ -152,7 +152,7 @@ export default function AnotherWMDetailPage() {
             ))}
           </MetaSection>
 
-          <button className="w-full rounded-full bg-ink px-5 py-3 text-sm font-semibold text-white shadow-[0_14px_28px_rgba(0,0,0,0.16)]" onClick={() => window.open(item.sourceUrl, "_blank", "noopener,noreferrer")}>
+          <button className="w-full rounded-full bg-ink px-5 py-3 text-sm font-semibold text-white shadow-[0_14px_28px_rgba(0,0,0,0.16)] lg:max-w-md" onClick={() => window.open(item.sourceUrl, "_blank", "noopener,noreferrer")}>
             Open source
           </button>
 
