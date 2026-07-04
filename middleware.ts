@@ -8,14 +8,14 @@ export function middleware(request: NextRequest) {
   const hasSession = Boolean(request.cookies.get(authCookie)?.value);
   const isProtected = protectedPaths.some((path) => pathname === path || pathname.startsWith(`${path}/`));
 
+  if (pathname === "/") {
+    return NextResponse.redirect(new URL(hasSession ? "/home" : "/login", request.url));
+  }
+
   if (isProtected && !hasSession) {
     const loginUrl = new URL("/login", request.url);
     loginUrl.searchParams.set("next", pathname);
     return NextResponse.redirect(loginUrl);
-  }
-
-  if ((pathname === "/" || pathname === "/login") && hasSession) {
-    return NextResponse.redirect(new URL("/home", request.url));
   }
 
   return NextResponse.next();
