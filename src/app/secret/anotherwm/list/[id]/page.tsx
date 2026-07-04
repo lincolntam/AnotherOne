@@ -89,7 +89,13 @@ export default function AnotherWMDetailPage() {
     <AppShell showHeader={false} showBottomNav={false}>
       <article className="min-h-[680px] overflow-hidden rounded-[34px] bg-white text-ink">
         <div className="relative h-[245px] w-full bg-paper">
-          {item.coverUrl ? <Image src={item.coverUrl} alt="" fill className="object-cover" unoptimized /> : <div className="h-full w-full bg-[linear-gradient(135deg,#f5f1e9,#dfe8e9)]" />}
+          {item.previewUrl ? (
+            <video className="h-full w-full object-cover" src={item.previewUrl} poster={item.coverUrl || undefined} controls muted playsInline />
+          ) : item.coverUrl ? (
+            <Image src={item.coverUrl} alt="" fill className="object-cover" unoptimized />
+          ) : (
+            <div className="h-full w-full bg-[linear-gradient(135deg,#f5f1e9,#dfe8e9)]" />
+          )}
           <Link href="/secret/anotherwm/list" aria-label="Back" className="absolute left-4 top-5 inline-flex h-10 w-10 items-center justify-center rounded-full bg-white/85 text-ink shadow-sm backdrop-blur">
             <ArrowLeft size={18} />
           </Link>

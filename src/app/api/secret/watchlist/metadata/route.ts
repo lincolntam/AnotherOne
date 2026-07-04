@@ -47,6 +47,7 @@ export async function POST(request: Request) {
         title,
         code,
         coverUrl,
+        previewUrl: absolutize(extractMeta(html, "og:video") || extractMeta(html, "og:video:url") || extractMeta(html, "og:video:secure_url") || "", parsed),
         actresses: uniqueByName(extractLinkedLabels(html, /href=["']([^"']*\/actresses\/[^"']*)["'][^>]*>([\s\S]*?)<\/a>/giu, parsed)),
         genres: uniqueByName(extractLinkedLabels(html, /href=["']([^"']*\/genres\/[^"']*)["'][^>]*>([\s\S]*?)<\/a>/giu, parsed)),
         releaseDate: extractReleaseDate(html),

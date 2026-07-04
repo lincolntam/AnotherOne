@@ -1,6 +1,7 @@
 "use client";
 
 import { AnimatePresence, motion } from "framer-motion";
+import type { Route } from "next";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
@@ -17,7 +18,9 @@ export default function PasscodePage() {
     if (code.length !== 6) return;
     if (code === PASSCODE) {
       window.sessionStorage.setItem("anotherone-secret-unlocked", "true");
-      router.push("/secret");
+      const redirectTo = window.sessionStorage.getItem("anotherone-secret-redirect") || "/secret";
+      window.sessionStorage.removeItem("anotherone-secret-redirect");
+      router.push(redirectTo as Route);
       return;
     }
 

@@ -15,6 +15,7 @@ export type WatchlistItem = {
   title: string;
   code: string;
   coverUrl: string;
+  previewUrl?: string;
   actresses: WatchlistPerson[];
   genres: WatchlistGenre[];
   releaseDate: string;
