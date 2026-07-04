@@ -27,6 +27,12 @@ type ImportPayload = {
 };
 
 const pendingImportKey = "anotherwm-pending-import";
+const titleLabels = ["Title", "\u6a19\u984c"];
+const actressLabels = ["Actress", "Actresses", "\u5973\u512a"];
+const genreLabels = ["Genre", "Genres", "\u985e\u578b"];
+const releaseDateLabels = ["Release date", "Release Date", "\u767c\u884c\u65e5\u671f"];
+const codeLabels = ["Code", "\u756a\u865f"];
+const allLabels = [...titleLabels, ...actressLabels, ...genreLabels, ...releaseDateLabels, ...codeLabels, "Series", "Maker", "Label", "Director", "\u7cfb\u5217", "\u767c\u884c\u5546", "\u6a19\u7c64", "\u5c0e\u6f14"];
 
 export default function AnotherWMImportPage() {
   const router = useRouter();
@@ -104,8 +110,8 @@ function createWatchlistItem(payload: ImportPayload): WatchlistItem {
 
   const rawText = cleanText(payload.selectedText || payload.rawText || payload.description || "");
   const site = getSite(payload.site || sourceUrl);
-  const code = normalizeCode(payload.code || readLabel(rawText, "番號") || extractCode(sourceUrl) || extractCode(payload.title || "") || extractCode(rawText));
-  const title = cleanText(payload.title || readLabel(rawText, "標題") || code || sourceUrl);
+  const code = normalizeCode(payload.code || readAnyLabel(rawText, codeLabels) || extractCode(sourceUrl) || extractCode(payload.title || "") || extractCode(rawText));
+  const title = cleanText(payload.title || readAnyLabel(rawText, titleLabels) || code || sourceUrl);
 
   return {
     id: createId(code, sourceUrl),
@@ -115,9 +121,9 @@ function createWatchlistItem(payload: ImportPayload): WatchlistItem {
     code,
     coverUrl: normalizeUrl(payload.coverUrl || payload.cover || payload.imageUrl || ""),
     previewUrl: normalizeUrl(payload.previewUrl || ""),
-    actresses: normalizeLinks(payload.actresses?.length ? payload.actresses : textToLinks(readLabel(rawText, "女優"))),
-    genres: normalizeLinks(payload.genres?.length ? payload.genres : textToLinks(readLabel(rawText, "類型"))),
-    releaseDate: cleanText(payload.releaseDate || readLabel(rawText, "發行日期")),
+    actresses: normalizeLinks(payload.actresses?.length ? payload.actresses : textToLinks(readAnyLabel(rawText, actressLabels))),
+    genres: normalizeLinks(payload.genres?.length ? payload.genres : textToLinks(readAnyLabel(rawText, genreLabels))),
+    releaseDate: cleanText(payload.releaseDate || readAnyLabel(rawText, releaseDateLabels)),
     savedAt: new Date().toISOString()
   };
 }
@@ -164,23 +170,35 @@ function normalizeUrl(value: string) {
   }
 }
 
-function cleanText(value: string) {
-  return value.replace(/\s+/gu, " ").trim();
+function readAnyLabel(value: string, labels: string[]) {
+  for (const label of labels) {
+    const result = readLabel(value, label);
+    if (result) return result;
+  }
+  return "";
 }
 
 function readLabel(value: string, label: string) {
   if (!value) return "";
-  const escaped = label.replace(/[.*+?^${}()|[\]\\]/gu, "\\$&");
-  const stopLabels = ["發行日期", "番號", "標題", "女優", "類型", "系列", "發行商", "標籤", "導演"].filter((item) => item !== label).map((item) => item.replace(/[.*+?^${}()|[\]\\]/gu, "\\$&")).join("|");
-  const pattern = new RegExp(`${escaped}\\s*[:：]\\s*([\\s\\S]*?)(?=\\s+(?:${stopLabels})\\s*[:：]|$)`, "u");
+  const escaped = escapeRegExp(label);
+  const stopLabels = allLabels.filter((item) => item.toLowerCase() !== label.toLowerCase()).map(escapeRegExp).join("|");
+  const pattern = new RegExp(`${escaped}\\s*[:\\uFF1A]\\s*([\\s\\S]*?)(?=\\s+(?:${stopLabels})\\s*[:\\uFF1A]|$)`, "iu");
   return cleanText(pattern.exec(value)?.[1] || "");
 }
 
 function textToLinks(value: string): WatchlistPerson[] {
   if (!value) return [];
   return value
-    .split(/[,，、/]/u)
+    .split(/[,\uFF0C\u3001/]/u)
     .map((name) => cleanText(name))
     .filter(Boolean)
     .map((name) => ({ name }));
+}
+
+function cleanText(value: string) {
+  return value.replace(/\s+/gu, " ").trim();
+}
+
+function escapeRegExp(value: string) {
+  return value.replace(/[.*+?^${}()|[\]\\]/gu, "\\$&");
 }

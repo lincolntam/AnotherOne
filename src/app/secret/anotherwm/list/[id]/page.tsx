@@ -10,8 +10,8 @@ import { api } from "@/lib/api";
 import type { WatchlistItem } from "@/types/watchlist";
 import { findWatchlistItem, upsertWatchlistItem } from "@/utils/watchlist-storage";
 
-const actressTitle = "\u5973\u512a";
-const genreTitle = "\u985e\u578b";
+const actressTitle = "Actress";
+const genreTitle = "Genre";
 
 export default function AnotherWMDetailPage() {
   const params = useParams<{ id: string }>();
@@ -121,12 +121,12 @@ export default function AnotherWMDetailPage() {
             AnotherWM
           </div>
           <div className="text-center">
-            <p className="text-[11px] font-bold uppercase tracking-[0.2em] text-graphite/45">{item.code || item.site}</p>
+            <p className="text-[11px] font-bold uppercase tracking-[0.2em] text-graphite/45">{item.code ? `Code: ${item.code}` : item.site}</p>
             <h1 className="mt-3 text-lg font-bold leading-7 text-ink">{item.title}</h1>
           </div>
 
           <div className="grid grid-cols-2 gap-3 text-xs text-graphite/70">
-            <InfoPill icon={<CalendarDays size={15} />} label={item.releaseDate || "No date"} />
+            <InfoPill icon={<CalendarDays size={15} />} label={`Release date: ${item.releaseDate || "No date"}`} />
             <InfoPill icon={<ExternalLink size={15} />} label={item.site} />
           </div>
 
