@@ -1,6 +1,6 @@
 "use client";
 
-import { ArrowLeft, ExternalLink, EyeOff, Instagram, X } from "lucide-react";
+import { ArrowLeft, Copy, ExternalLink, EyeOff, Instagram, LogIn, X } from "lucide-react";
 import type { Route } from "next";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -14,7 +14,9 @@ export default function AnotherInPage() {
   const [allowed, setAllowed] = useState(false);
   const [sourceUrl, setSourceUrl] = useState(defaultInstagramUrl);
   const [inputUrl, setInputUrl] = useState(defaultInstagramUrl);
+  const [copied, setCopied] = useState(false);
   const embed = useMemo(() => toInstagramEmbed(sourceUrl), [sourceUrl]);
+  const webLoginUrl = useMemo(() => toInstagramWebLoginUrl(sourceUrl), [sourceUrl]);
 
   useEffect(() => {
     if (window.sessionStorage.getItem("anotherone-secret-unlocked") === "true") {
@@ -29,6 +31,13 @@ export default function AnotherInPage() {
   function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     setSourceUrl(normalizeInstagramUrl(inputUrl));
+    setCopied(false);
+  }
+
+  async function copySourceUrl() {
+    await navigator.clipboard.writeText(sourceUrl);
+    setCopied(true);
+    window.setTimeout(() => setCopied(false), 1800);
   }
 
   return (
@@ -63,7 +72,7 @@ export default function AnotherInPage() {
 
           <div className="rounded-[5px] bg-paper p-5 text-sm leading-6 text-graphite/70">
             <p className="font-semibold text-ink">Instagram embed note</p>
-            <p className="mt-2">Instagram home/profile pages cannot be embedded in a PWA. Paste a post or reel URL to preview it on the right side.</p>
+            <p className="mt-2">Instagram home/profile pages cannot be embedded in a PWA. Use Copy URL and paste into Safari, or try Web Login to reduce app redirect.</p>
           </div>
         </aside>
 
@@ -77,13 +86,20 @@ export default function AnotherInPage() {
               <div className="flex min-h-[520px] flex-col items-center justify-center rounded-[5px] border border-black/[0.04] bg-paper px-8 text-center">
                 <Instagram size={34} className="text-graphite/35" />
                 <h2 className="mt-6 text-lg font-bold text-ink">Instagram cannot open inside PWA.</h2>
-                <p className="mt-3 max-w-sm text-sm leading-6 text-graphite/60">This URL is blocked from iframe embedding. Use Open Instagram, or paste a post/reel URL for embedded preview.</p>
+                <p className="mt-3 max-w-sm text-sm leading-6 text-graphite/60">This URL is blocked from iframe embedding. Copy the URL and paste it into Safari, or try Instagram Web Login.</p>
               </div>
             )}
 
-            <button className="ao-button mt-5 w-full" onClick={() => window.open(sourceUrl, "_blank", "noopener,noreferrer")}>
-              Open Instagram
-            </button>
+            <div className="mt-5 grid gap-3 sm:grid-cols-2">
+              <button className="ao-button w-full" onClick={copySourceUrl}>
+                <Copy size={16} />
+                {copied ? "Copied" : "Copy URL"}
+              </button>
+              <button className="ao-button w-full" onClick={() => window.open(webLoginUrl, "_blank", "noopener,noreferrer")}>
+                <LogIn size={16} />
+                Open Web Login
+              </button>
+            </div>
           </div>
         </section>
       </article>
@@ -114,5 +130,16 @@ function toInstagramEmbed(value: string) {
     return { canEmbed: false, url: normalized };
   } catch {
     return { canEmbed: false, url: defaultInstagramUrl };
+  }
+}
+
+function toInstagramWebLoginUrl(value: string) {
+  const normalized = normalizeInstagramUrl(value);
+  try {
+    const url = new URL(normalized);
+    const next = `${url.pathname}${url.search}${url.hash}` || "/";
+    return `https://www.instagram.com/accounts/login/?next=${encodeURIComponent(next)}`;
+  } catch {
+    return "https://www.instagram.com/accounts/login/";
   }
 }
