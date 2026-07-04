@@ -50,6 +50,16 @@ export function AppShell({ children, websites = [], showBottomNav = true, showHe
     };
   }, [hydrate, pathname, requiresAuth, router]);
 
+  useEffect(() => {
+    if (!pathname.startsWith("/secret")) return;
+    window.localStorage.removeItem("anotherone-anotherwm-watchlist");
+    if ("caches" in window) {
+      window.caches.keys()
+        .then((keys) => Promise.all(keys.filter((key) => key.includes("anotherone-images")).map((key) => window.caches.delete(key))))
+        .catch(() => undefined);
+    }
+  }, [pathname]);
+
   if (requiresAuth && (!checked || !user)) {
     return (
       <main className="ao-shell">

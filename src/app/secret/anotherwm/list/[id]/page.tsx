@@ -10,7 +10,6 @@ import { ExternalCoverImage } from "@/components/external-cover-image";
 import { api } from "@/lib/api";
 import type { WatchlistItem, WatchlistStatus } from "@/types/watchlist";
 import { isDirtyWatchlistItem } from "@/utils/watchlist-sanitize";
-import { findWatchlistItem, removeWatchlistItem, upsertWatchlistItem } from "@/utils/watchlist-storage";
 
 const actressTitle = "Actress";
 const genreTitle = "Genre";
@@ -34,11 +33,10 @@ export default function AnotherWMDetailPage() {
 
       setAllowed(true);
       const id = decodeURIComponent(params.id);
-      const local = findWatchlistItem(id);
       const remote = await api<WatchlistItem[]>("/api/secret/watchlist")
         .then((items) => items.find((entry) => entry.id === id))
         .catch(() => null);
-      const saved = pickRicherItem(remote || null, local || null);
+      const saved = remote || null;
 
       if (saved) {
         if (shouldRefresh(saved)) {
@@ -68,7 +66,6 @@ export default function AnotherWMDetailPage() {
           method: "POST",
           body: JSON.stringify(fetched)
         });
-        upsertWatchlistItem(fetched);
         if (!cancelled) setItem(fetched);
       } catch {
         if (!cancelled) setItem(null);
@@ -183,7 +180,6 @@ export default function AnotherWMDetailPage() {
     if (!item) return;
     const next = { ...item, status };
     setItem(next);
-    upsertWatchlistItem(next);
     api<WatchlistItem>("/api/secret/watchlist", {
       method: "POST",
       body: JSON.stringify(next)
@@ -192,7 +188,6 @@ export default function AnotherWMDetailPage() {
 
   function removeItem() {
     if (!item) return;
-    removeWatchlistItem(item.id);
     api<{ ok: boolean }>("/api/secret/watchlist", {
       method: "DELETE",
       body: JSON.stringify({ id: item.id, sourceUrl: item.sourceUrl })
@@ -216,26 +211,11 @@ async function refreshWatchlistItem(item: WatchlistItem) {
     method: "POST",
     body: JSON.stringify(fetched)
   });
-  upsertWatchlistItem(fetched);
   return fetched;
 }
 
 function shouldRefresh(item: WatchlistItem) {
   return !item.releaseDate || !item.genres.length || isDirtyWatchlistItem(item);
-}
-
-function pickRicherItem(primary: WatchlistItem | null, fallback: WatchlistItem | null) {
-  if (!primary) return fallback;
-  if (!fallback) return primary;
-  return metadataScore(fallback) > metadataScore(primary) ? fallback : primary;
-}
-
-function metadataScore(item: WatchlistItem) {
-  return Number(Boolean(item.title && item.title !== item.code)) * 2 +
-    Number(Boolean(item.releaseDate)) * 3 +
-    item.actresses.length * 2 +
-    item.genres.length * 2 +
-    Number(Boolean(item.coverUrl));
 }
 
 function InfoPill({ icon, label }: { icon: React.ReactNode; label: string }) {

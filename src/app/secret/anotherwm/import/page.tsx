@@ -8,7 +8,6 @@ import { AppShell } from "@/components/app-shell";
 import { api } from "@/lib/api";
 import type { WatchlistGenre, WatchlistItem, WatchlistPerson } from "@/types/watchlist";
 import { cleanReleaseDate, cleanText, normalizeCode, normalizeWatchlistItem, sanitizeGenres, sanitizePeople } from "@/utils/watchlist-sanitize";
-import { upsertWatchlistItem } from "@/utils/watchlist-storage";
 
 type ImportPayload = {
   url?: string;
@@ -68,7 +67,6 @@ export default function AnotherWMImportPage() {
         body: JSON.stringify(item)
       })
         .then((saved) => {
-          upsertWatchlistItem(saved);
           window.sessionStorage.removeItem(pendingImportKey);
           setStatus("saved");
           setMessage("Saved to AnotherWM.");
@@ -81,11 +79,8 @@ export default function AnotherWMImportPage() {
             return;
           }
 
-          upsertWatchlistItem(item);
-          window.sessionStorage.removeItem(pendingImportKey);
-          setStatus("saved");
-          setMessage("Saved locally. Cloud sync is unavailable.");
-          window.setTimeout(() => router.replace(`/secret/anotherwm/list/${encodeURIComponent(item.id)}` as Route), 650);
+          setStatus("error");
+          setMessage("Cloud sync is unavailable. Nothing was saved on this phone.");
         });
     } catch {
       setStatus("error");

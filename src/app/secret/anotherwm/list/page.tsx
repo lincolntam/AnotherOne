@@ -9,7 +9,6 @@ import { ExternalCoverImage } from "@/components/external-cover-image";
 import { JournalHeader } from "@/components/journal-list";
 import { api } from "@/lib/api";
 import type { WatchlistItem } from "@/types/watchlist";
-import { loadWatchlist } from "@/utils/watchlist-storage";
 import { anotherWMShortcuts } from "@/utils/anotherwm-shortcuts";
 
 export default function AnotherWMListPage() {
@@ -40,7 +39,7 @@ function AnotherWMListContent() {
     setAllowed(true);
     api<WatchlistItem[]>("/api/secret/watchlist")
       .then(setItems)
-      .catch(() => setItems(loadWatchlist()));
+      .catch(() => setItems([]));
   }, [router]);
 
   if (!allowed) return null;

@@ -10,7 +10,6 @@ import { JournalHeader } from "@/components/journal-list";
 import { api } from "@/lib/api";
 import type { WatchlistItem, WatchlistStatus } from "@/types/watchlist";
 import { anotherWMShortcuts } from "@/utils/anotherwm-shortcuts";
-import { loadWatchlist } from "@/utils/watchlist-storage";
 
 type TagType = "actress" | "genre" | "status";
 
@@ -44,7 +43,7 @@ function AnotherWMTagsContent() {
     setAllowed(true);
     api<WatchlistItem[]>("/api/secret/watchlist")
       .then(setItems)
-      .catch(() => setItems(loadWatchlist()));
+      .catch(() => setItems([]));
   }, [router]);
 
   if (!allowed) return null;

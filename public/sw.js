@@ -1,5 +1,5 @@
-const CACHE_NAME = "anotherone-v1";
-const IMAGE_CACHE = "anotherone-images-v1";
+const CACHE_NAME = "anotherone-v2";
+const IMAGE_CACHE = "anotherone-images-v2";
 const CORE_ASSETS = ["/offline.html", "/manifest.webmanifest", "/icons/icon.svg"];
 
 self.addEventListener("install", (event) => {
@@ -10,7 +10,7 @@ self.addEventListener("install", (event) => {
 self.addEventListener("activate", (event) => {
   event.waitUntil(
     caches.keys().then((keys) =>
-      Promise.all(keys.filter((key) => ![CACHE_NAME, IMAGE_CACHE].includes(key)).map((key) => caches.delete(key)))
+      Promise.all(keys.filter((key) => key !== CACHE_NAME).map((key) => caches.delete(key)))
     )
   );
   self.clients.claim();
@@ -21,6 +21,16 @@ self.addEventListener("fetch", (event) => {
   if (request.method !== "GET") return;
 
   const url = new URL(request.url);
+  if (isSecretRequest(url)) {
+    event.respondWith(fetch(request));
+    return;
+  }
+
+  if (request.destination === "image" && url.origin !== self.location.origin) {
+    event.respondWith(fetch(request));
+    return;
+  }
+
   if (request.destination === "image") {
     event.respondWith(cacheFirst(request, IMAGE_CACHE));
     return;
@@ -30,6 +40,11 @@ self.addEventListener("fetch", (event) => {
     event.respondWith(networkFirst(request));
   }
 });
+
+function isSecretRequest(url) {
+  if (url.origin !== self.location.origin) return false;
+  return url.pathname.startsWith("/secret") || url.pathname.startsWith("/api/secret");
+}
 
 async function cacheFirst(request, cacheName) {
   const cache = await caches.open(cacheName);

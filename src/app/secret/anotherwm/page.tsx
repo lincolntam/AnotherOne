@@ -11,7 +11,6 @@ import { api } from "@/lib/api";
 import type { WatchlistItem } from "@/types/watchlist";
 import type { WebsiteShortcut } from "@/types/app";
 import { anotherWMShortcuts } from "@/utils/anotherwm-shortcuts";
-import { loadWatchlist, upsertWatchlistItem } from "@/utils/watchlist-storage";
 
 export default function AnotherWMPage() {
   const router = useRouter();
@@ -38,7 +37,7 @@ export default function AnotherWMPage() {
     if (!allowed) return;
     api<WatchlistItem[]>("/api/secret/watchlist")
       .then((items) => setWatchlistCards(toShortcutCards(items)))
-      .catch(() => setWatchlistCards(toShortcutCards(loadWatchlist())));
+      .catch(() => setWatchlistCards(anotherWMShortcuts));
   }, [allowed]);
 
   useEffect(() => {
@@ -67,7 +66,6 @@ export default function AnotherWMPage() {
         method: "POST",
         body: JSON.stringify(item)
       });
-      upsertWatchlistItem(item);
       setUrl("");
       setAddOpen(false);
       router.push("/secret/anotherwm/list" as Route);
