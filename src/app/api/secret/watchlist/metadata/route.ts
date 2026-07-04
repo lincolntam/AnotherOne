@@ -1,59 +1,64 @@
 import { NextResponse } from "next/server";
+import { handleApiError } from "@/lib/api-errors";
 import { requireUser } from "@/services/auth-service";
 import type { WatchlistGenre, WatchlistItem, WatchlistPerson } from "@/types/watchlist";
 
 const allowedHosts = ["missav.ws", "jable.tv"];
 
 export async function POST(request: Request) {
-  await requireUser();
-  const body = (await request.json().catch(() => ({}))) as { url?: string };
-  const sourceUrl = body.url?.trim();
-
-  if (!sourceUrl) {
-    return NextResponse.json({ error: "URL is required." }, { status: 400 });
-  }
-
-  const parsed = parseAllowedUrl(sourceUrl);
-  if (!parsed) {
-    return NextResponse.json({ error: "Only MissAV and Jable URLs are supported." }, { status: 400 });
-  }
-
-  const site = parsed.hostname.includes("jable") ? "jable" : "missav";
-  const fallback = createFallbackItem(parsed.href, site);
-
   try {
-    const response = await fetch(parsed.href, {
-      headers: {
-        "Accept": "text/html,application/xhtml+xml",
-        "User-Agent": "AnotherOne/1.0 (+https://anotherone.local)"
-      },
-      redirect: "follow"
-    });
+    await requireUser();
+    const body = (await request.json().catch(() => ({}))) as { url?: string };
+    const sourceUrl = body.url?.trim();
 
-    if (!response.ok) {
-      return NextResponse.json({ data: fallback });
+    if (!sourceUrl) {
+      return NextResponse.json({ error: "URL is required." }, { status: 400 });
     }
 
-    const html = await response.text();
-    const title = cleanText(extractMeta(html, "og:title") || extractTag(html, "h1") || extractTitle(html) || fallback.title);
-    const coverUrl = absolutize(extractMeta(html, "og:image") || extractLinkImage(html) || "", parsed);
-    const code = extractCode(`${parsed.pathname} ${title}`) || fallback.code;
-    const item: WatchlistItem = {
-      id: createId(code, parsed.href),
-      sourceUrl: parsed.href,
-      site,
-      title,
-      code,
-      coverUrl,
-      actresses: uniqueByName(extractLinkedLabels(html, /href=["']([^"']*\/actresses\/[^"']*)["'][^>]*>([\s\S]*?)<\/a>/giu, parsed)),
-      genres: uniqueByName(extractLinkedLabels(html, /href=["']([^"']*\/genres\/[^"']*)["'][^>]*>([\s\S]*?)<\/a>/giu, parsed)),
-      releaseDate: extractReleaseDate(html),
-      savedAt: new Date().toISOString()
-    };
+    const parsed = parseAllowedUrl(sourceUrl);
+    if (!parsed) {
+      return NextResponse.json({ error: "Only MissAV and Jable URLs are supported." }, { status: 400 });
+    }
 
-    return NextResponse.json({ data: item });
-  } catch {
-    return NextResponse.json({ data: fallback });
+    const site = parsed.hostname.includes("jable") ? "jable" : "missav";
+    const fallback = createFallbackItem(parsed.href, site);
+
+    try {
+      const response = await fetch(parsed.href, {
+        headers: {
+          "Accept": "text/html,application/xhtml+xml",
+          "User-Agent": "AnotherOne/1.0 (+https://anotherone.local)"
+        },
+        redirect: "follow"
+      });
+
+      if (!response.ok) {
+        return NextResponse.json({ data: fallback });
+      }
+
+      const html = await response.text();
+      const title = cleanText(extractMeta(html, "og:title") || extractTag(html, "h1") || extractTitle(html) || fallback.title);
+      const coverUrl = absolutize(extractMeta(html, "og:image") || extractLinkImage(html) || "", parsed);
+      const code = extractCode(`${parsed.pathname} ${title}`) || fallback.code;
+      const item: WatchlistItem = {
+        id: createId(code, parsed.href),
+        sourceUrl: parsed.href,
+        site,
+        title,
+        code,
+        coverUrl,
+        actresses: uniqueByName(extractLinkedLabels(html, /href=["']([^"']*\/actresses\/[^"']*)["'][^>]*>([\s\S]*?)<\/a>/giu, parsed)),
+        genres: uniqueByName(extractLinkedLabels(html, /href=["']([^"']*\/genres\/[^"']*)["'][^>]*>([\s\S]*?)<\/a>/giu, parsed)),
+        releaseDate: extractReleaseDate(html),
+        savedAt: new Date().toISOString()
+      };
+
+      return NextResponse.json({ data: item });
+    } catch {
+      return NextResponse.json({ data: fallback });
+    }
+  } catch (error) {
+    return handleApiError(error);
   }
 }
 
