@@ -3,7 +3,7 @@ import type { WatchlistGenre, WatchlistItem, WatchlistPerson } from "@/types/wat
 type WatchlistLink = WatchlistPerson | WatchlistGenre;
 
 const junkPattern =
-  /(?:ranking|login|sign|vip|missav|search|english|malayu|deutsch|francais|fran.?ais|tieng viet|bahasa indonesia|filipino|portugues|telegram|vpn|official|menu)/iu;
+  /(?:ranking|login|sign|vip|search|english|malayu|deutsch|francais|fran.?ais|tieng viet|bahasa indonesia|filipino|portugues|telegram|vpn|official|menu)/iu;
 
 export function normalizeWatchlistItem(item: WatchlistItem): WatchlistItem {
   return {
@@ -59,7 +59,7 @@ function sanitizeLinks<T extends WatchlistLink>(items: T[] | undefined, options:
       url: cleanUrl(item.url || "") || undefined
     }))
     .filter((item) => {
-      if (!item.name || item.name.length > 42 || junkPattern.test(`${item.name} ${item.url || ""}`)) return false;
+      if (!item.name || item.name.length > 42 || junkPattern.test(item.name)) return false;
       if (item.url && !urlContainsPath(item.url, options.requiredPath)) return false;
 
       const key = `${item.name.toLowerCase()}|${item.url || ""}`;
@@ -72,7 +72,7 @@ function sanitizeLinks<T extends WatchlistLink>(items: T[] | undefined, options:
 }
 
 function hasJunkLinks(items: WatchlistLink[]) {
-  return items.some((item) => junkPattern.test(`${item.name} ${item.url || ""}`));
+  return items.some((item) => junkPattern.test(item.name));
 }
 
 function cleanUrl(value: string) {
