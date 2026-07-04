@@ -122,12 +122,12 @@ export default function AnotherWMDetailPage() {
             <InfoPill icon={<ExternalLink size={15} />} label={item.site} />
           </div>
 
-          <MetaSection icon={<UserRound size={16} />} title="People">
-            {item.actresses.length ? item.actresses.map((person) => <MetaLink key={person.name} name={person.name} url={person.url} />) : <span className="text-xs text-graphite/45">No data</span>}
+          <MetaSection icon={<UserRound size={16} />} title="女優">
+            {item.actresses.map((person) => <MetaLink key={person.name} name={person.name} url={person.url} />)}
           </MetaSection>
 
-          <MetaSection icon={<Tag size={16} />} title="Genres">
-            {item.genres.length ? item.genres.map((genre) => <MetaLink key={genre.name} name={genre.name} url={genre.url} />) : <span className="text-xs text-graphite/45">No data</span>}
+          <MetaSection icon={<Tag size={16} />} title="類型">
+            {item.genres.map((genre) => <MetaLink key={genre.name} name={genre.name} url={genre.url} />)}
           </MetaSection>
 
           <button className="w-full rounded-full bg-ink px-5 py-3 text-sm font-semibold text-white shadow-[0_14px_28px_rgba(0,0,0,0.16)]" onClick={() => window.open(item.sourceUrl, "_blank", "noopener,noreferrer")}>
