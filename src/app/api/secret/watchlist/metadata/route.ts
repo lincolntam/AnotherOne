@@ -36,7 +36,7 @@ export async function POST(request: Request) {
       });
 
       if (!response.ok) {
-        return NextResponse.json({ data: fallback });
+        return NextResponse.json({ data: enrichFallbackCover(fallback) });
       }
 
       const html = await response.text();
@@ -48,7 +48,7 @@ export async function POST(request: Request) {
         site,
         title,
         code,
-        coverUrl: absolutize(extractCoverImage(html) || extractMeta(html, "og:image") || extractLinkImage(html) || "", parsed),
+        coverUrl: absolutize(extractCoverImage(html) || extractMeta(html, "og:image") || extractLinkImage(html) || fallbackCoverUrl(code), parsed),
         previewUrl: absolutize(extractMeta(html, "og:video") || extractMeta(html, "og:video:url") || extractMeta(html, "og:video:secure_url") || "", parsed),
         actresses: uniqueByName(extractLabelLinks<WatchlistPerson>(html, actressLabel, parsed)),
         genres: uniqueByName(extractLabelLinks<WatchlistGenre>(html, genreLabel, parsed)),
@@ -58,7 +58,7 @@ export async function POST(request: Request) {
 
       return NextResponse.json({ data: item });
     } catch {
-      return NextResponse.json({ data: fallback });
+      return NextResponse.json({ data: enrichFallbackCover(fallback) });
     }
   } catch (error) {
     return handleApiError(error);
@@ -96,6 +96,15 @@ function createFallbackItem(sourceUrl: string, site: WatchlistItem["site"]): Wat
     releaseDate: "",
     savedAt: new Date().toISOString()
   };
+}
+
+function enrichFallbackCover(item: WatchlistItem): WatchlistItem {
+  if (item.coverUrl || !item.code) return item;
+  return { ...item, coverUrl: fallbackCoverUrl(item.code) };
+}
+
+function fallbackCoverUrl(code: string) {
+  return code ? `https://fourhoi.com/${code.toLowerCase()}/cover-n.jpg` : "";
 }
 
 function createId(code: string, sourceUrl: string) {

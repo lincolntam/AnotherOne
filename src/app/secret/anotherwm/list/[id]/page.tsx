@@ -154,7 +154,7 @@ export default function AnotherWMDetailPage() {
 function createSourceUrl(id: string) {
   const normalized = id.trim().toLowerCase();
   if (/^https?:\/\//u.test(normalized)) return normalized;
-  return `https://missav.ws/${normalized}`;
+  return `https://fourhoi.com/${normalized}/`;
 }
 
 async function refreshWatchlistItem(item: WatchlistItem) {
@@ -171,7 +171,7 @@ async function refreshWatchlistItem(item: WatchlistItem) {
 }
 
 function shouldRefresh(item: WatchlistItem) {
-  return !item.coverUrl || !item.releaseDate || !item.genres.length || item.actresses.some((person) => /ranking|排行/iu.test(`${person.name} ${person.url || ""}`));
+  return !item.coverUrl || !item.releaseDate || !item.genres.length || item.actresses.some((person) => /ranking|\u6392\u884c/iu.test(`${person.name} ${person.url || ""}`));
 }
 
 function proxiedImageUrl(value: string) {
