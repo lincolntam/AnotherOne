@@ -22,8 +22,9 @@ export default function AnotherWMDetailPage() {
   const [allowed, setAllowed] = useState(false);
   const [loading, setLoading] = useState(true);
   const [menuOpen, setMenuOpen] = useState(false);
-  const [imageEditorOpen, setImageEditorOpen] = useState(false);
+  const [editorOpen, setEditorOpen] = useState(false);
   const [imageUrl, setImageUrl] = useState("");
+  const [codeInput, setCodeInput] = useState("");
 
   useEffect(() => {
     let cancelled = false;
@@ -175,7 +176,7 @@ export default function AnotherWMDetailPage() {
               {menuOpen ? (
                 <div className="absolute bottom-12 left-0 z-10 w-44 rounded-2xl border border-black/[0.04] bg-white p-2 text-left shadow-[0_18px_40px_rgba(0,0,0,0.14)]">
                   <button className="w-full rounded-xl px-3 py-2 text-left text-xs font-bold text-ink transition hover:bg-paper" onClick={openImageEditor}>
-                    Edit image
+                    Edit
                   </button>
                   <button className="w-full rounded-xl px-3 py-2 text-left text-xs font-bold text-rose-500 transition hover:bg-rose-50" onClick={removeItem}>
                     Remove from list
@@ -187,18 +188,21 @@ export default function AnotherWMDetailPage() {
         </section>
       </article>
 
-      {imageEditorOpen ? (
+      {editorOpen ? (
         <div className="absolute inset-0 z-50 flex items-center justify-center bg-white/75 p-6 backdrop-blur">
-          <form className="w-full max-w-md rounded-[28px] bg-white p-5 shadow-journal" onSubmit={saveImageUrl}>
+          <form className="w-full max-w-md rounded-[28px] bg-white p-5 shadow-journal" onSubmit={saveItemEdits}>
             <div className="mb-4 flex items-center justify-between">
-              <p className="text-sm font-bold text-ink">Edit image</p>
-              <button type="button" aria-label="Close image editor" className="inline-flex h-9 w-9 items-center justify-center rounded-full hover:bg-paper" onClick={() => setImageEditorOpen(false)}>
+              <p className="text-sm font-bold text-ink">Edit</p>
+              <button type="button" aria-label="Close editor" className="inline-flex h-9 w-9 items-center justify-center rounded-full hover:bg-paper" onClick={() => setEditorOpen(false)}>
                 <X size={17} />
               </button>
             </div>
-            <input className="ao-input" value={imageUrl} onChange={(event) => setImageUrl(event.target.value)} placeholder="Paste cover image URL" autoFocus />
+            <label className="mb-2 block text-[11px] font-bold uppercase tracking-[0.16em] text-graphite/50">Code</label>
+            <input className="ao-input mb-4" value={codeInput} onChange={(event) => setCodeInput(event.target.value)} placeholder="Code" autoFocus />
+            <label className="mb-2 block text-[11px] font-bold uppercase tracking-[0.16em] text-graphite/50">Image URL</label>
+            <input className="ao-input" value={imageUrl} onChange={(event) => setImageUrl(event.target.value)} placeholder="Paste cover image URL" />
             <button className="ao-button mt-4 w-full" type="submit" disabled={!imageUrl.trim()}>
-              Save image
+              Save
             </button>
           </form>
         </div>
@@ -230,17 +234,18 @@ export default function AnotherWMDetailPage() {
   function openImageEditor() {
     if (!item) return;
     setImageUrl(item.coverUrl);
+    setCodeInput(item.code);
     setMenuOpen(false);
-    setImageEditorOpen(true);
+    setEditorOpen(true);
   }
 
-  function saveImageUrl(event: React.FormEvent<HTMLFormElement>) {
+  function saveItemEdits(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
     if (!item) return;
-    const next = { ...item, coverUrl: imageUrl.trim() };
+    const next = { ...item, code: codeInput.trim().toUpperCase(), coverUrl: imageUrl.trim() };
     setItem(next);
     setItems((current) => current.map((entry) => (entry.id === next.id ? next : entry)));
-    setImageEditorOpen(false);
+    setEditorOpen(false);
     api<WatchlistItem>("/api/secret/watchlist", {
       method: "POST",
       body: JSON.stringify(next)

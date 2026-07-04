@@ -35,7 +35,7 @@ export function Header() {
       <AnimatePresence>
         {menuOpen ? (
           <motion.div
-            className="fixed left-1/2 top-[168px] z-50 w-48 -translate-x-1/2 rounded-[24px] border border-black/[0.04] bg-white/95 p-2 shadow-journal backdrop-blur"
+            className="absolute left-1/2 top-[92px] z-50 w-48 -translate-x-1/2 rounded-[24px] border border-black/[0.04] bg-white/95 p-2 shadow-journal backdrop-blur"
             initial={{ opacity: 0, y: -8, scale: 0.98 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: -8, scale: 0.98 }}

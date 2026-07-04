@@ -23,6 +23,7 @@ export function AppShell({ children, websites = [], showBottomNav = true, showHe
   const user = useAuthStore((state) => state.user);
   const [checked, setChecked] = useState(false);
   const requiresAuth = isProtectedPath(pathname);
+  const fullScreen = pathname.startsWith("/secret/anotherwm/list/");
 
   useEffect(() => {
     let cancelled = false;
@@ -72,7 +73,7 @@ export function AppShell({ children, websites = [], showBottomNav = true, showHe
 
   return (
     <main className="ao-shell">
-      <section className="ao-phone">
+      <section className={`ao-phone ${fullScreen ? "ao-phone-full" : ""}`}>
         {showHeader ? <Header /> : null}
         <motion.div
           initial={{ opacity: 0, y: 16 }}

@@ -91,13 +91,17 @@ select {
   @media (min-width: 900px) {
     .ao-shell {
       min-height: 100dvh;
-      @apply max-w-none items-stretch px-0 py-0;
+      @apply max-w-none items-stretch justify-start bg-white px-0 py-0;
     }
 
     .ao-phone {
       min-height: 100dvh;
       max-height: none;
-      @apply w-full max-w-none overflow-y-auto rounded-none px-8 pb-24 pt-7 shadow-none;
+      @apply w-[780px] max-w-[48vw] overflow-y-auto rounded-none border-r border-black/[0.05] px-8 pb-24 pt-7 shadow-none;
+    }
+
+    .ao-phone.ao-phone-full {
+      @apply w-full max-w-none border-r-0 px-0 pb-0 pt-0;
     }
 
     .ao-phone::before {
