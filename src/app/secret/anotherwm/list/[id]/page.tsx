@@ -1,6 +1,7 @@
 "use client";
 
 import { ArrowLeft, CalendarDays, ExternalLink, EyeOff, Tag, UserRound } from "lucide-react";
+import type { Route } from "next";
 import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
@@ -129,16 +130,16 @@ export default function AnotherWMDetailPage() {
           </div>
 
           <div className="grid grid-cols-2 gap-3 text-xs text-graphite/70">
-            <InfoPill icon={<CalendarDays size={15} />} label={`Release date: ${item.releaseDate || "No date"}`} />
+            <InfoPill icon={<CalendarDays size={15} />} label={item.releaseDate || "No date"} />
             <InfoPill icon={<ExternalLink size={15} />} label={item.site} />
           </div>
 
           <MetaSection icon={<UserRound size={16} />} title={actressTitle}>
-            {item.actresses.map((person) => <MetaLink key={person.name} name={person.name} url={person.url} />)}
+            {item.actresses.map((person) => <MetaLink key={person.name} kind="actress" name={person.name} url={person.url} />)}
           </MetaSection>
 
           <MetaSection icon={<Tag size={16} />} title={genreTitle}>
-            {item.genres.map((genre) => <MetaLink key={genre.name} name={genre.name} url={genre.url} />)}
+            {item.genres.map((genre) => <MetaLink key={genre.name} kind="genre" name={genre.name} url={genre.url} />)}
           </MetaSection>
 
           <button className="w-full rounded-full bg-ink px-5 py-3 text-sm font-semibold text-white shadow-[0_14px_28px_rgba(0,0,0,0.16)]" onClick={() => window.open(item.sourceUrl, "_blank", "noopener,noreferrer")}>
@@ -208,14 +209,11 @@ function MetaSection({ icon, title, children }: { icon: React.ReactNode; title: 
   );
 }
 
-function MetaLink({ name, url }: { name: string; url?: string }) {
-  if (!url) {
-    return <span className="rounded-full bg-paper px-3 py-2 text-xs font-semibold text-ink">{name}</span>;
-  }
-
+function MetaLink({ kind, name, url }: { kind: "actress" | "genre"; name: string; url?: string }) {
+  const filterUrl = `/secret/anotherwm/list?${kind}=${encodeURIComponent(name)}${url ? `&url=${encodeURIComponent(url)}` : ""}`;
   return (
-    <a href={url} target="_blank" rel="noreferrer" className="rounded-full bg-paper px-3 py-2 text-xs font-semibold text-ink transition hover:bg-mist">
+    <Link href={filterUrl as Route} className="rounded-full bg-paper px-3 py-2 text-xs font-semibold text-ink transition hover:bg-mist">
       {name}
-    </a>
+    </Link>
   );
 }
