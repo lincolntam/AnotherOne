@@ -28,7 +28,7 @@ const workerWrapper = `import worker, { BucketCachePurge, DOQueueHandler, DOShar
 export { BucketCachePurge, DOQueueHandler, DOShardedTagCache };
 
 const assetPrefixes = ["/_next/static/", "/icons/", "/assets/"];
-const assetPaths = new Set(["/BUILD_ID", "/manifest.webmanifest", "/offline.html", "/sw.js"]);
+const assetPaths = new Set(["/BUILD_ID", "/manifest.webmanifest", "/offline.html", "/sw.js", "/anotherwm-bookmarklet.js"]);
 
 export default {
   async fetch(request, env, ctx) {
