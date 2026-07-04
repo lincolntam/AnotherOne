@@ -1,14 +1,18 @@
 "use client";
 
 import { AnimatePresence, motion } from "framer-motion";
-import { ArrowLeft, LogOut, Menu, Search, UserRound } from "lucide-react";
+import { ArrowLeft, LogOut, Menu, Search, Settings, UserRound } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useState } from "react";
 import { useAuthStore } from "@/stores/auth-store";
 import { useSearchStore } from "@/stores/search-store";
 
-export function Header() {
+type HeaderProps = {
+  onOpenSetting?: () => void;
+};
+
+export function Header({ onOpenSetting }: HeaderProps) {
   const [menuOpen, setMenuOpen] = useState(false);
   const pathname = usePathname();
   const setSearchOpen = useSearchStore((state) => state.setOpen);
@@ -51,6 +55,12 @@ export function Header() {
               <UserRound size={17} />
               Profile
             </Link>
+            {onOpenSetting ? (
+              <button className="flex w-full items-center gap-3 rounded-2xl px-3 py-3 text-left text-sm hover:bg-mist/70" onClick={onOpenSetting}>
+                <Settings size={17} />
+                Setting
+              </button>
+            ) : null}
             <button className="flex w-full items-center gap-3 rounded-2xl px-3 py-3 text-left text-sm hover:bg-mist/70" onClick={logout}>
               <LogOut size={17} />
               Logout

@@ -6,8 +6,10 @@ import { useEffect, useState } from "react";
 import { Header } from "@/components/header";
 import { BottomNav } from "@/components/bottom-nav";
 import { SearchModal } from "@/components/search-modal";
+import { ImageDrawSettings } from "@/components/image-draw-settings";
 import { useAuthStore } from "@/stores/auth-store";
 import type { WebsiteShortcut } from "@/types/app";
+import { getImageDrawKey } from "@/utils/image-draw";
 
 type AppShellProps = {
   children: React.ReactNode;
@@ -22,8 +24,10 @@ export function AppShell({ children, websites = [], showBottomNav = true, showHe
   const hydrate = useAuthStore((state) => state.hydrate);
   const user = useAuthStore((state) => state.user);
   const [checked, setChecked] = useState(false);
+  const [settingOpen, setSettingOpen] = useState(false);
   const requiresAuth = isProtectedPath(pathname);
   const fullScreen = pathname.startsWith("/secret/anotherwm/list/") || pathname.startsWith("/secret/anotherin");
+  const drawKey = getImageDrawKey(pathname);
 
   useEffect(() => {
     let cancelled = false;
@@ -74,7 +78,7 @@ export function AppShell({ children, websites = [], showBottomNav = true, showHe
   return (
     <main className="ao-shell">
       <section className={`ao-phone ${fullScreen ? "ao-phone-full" : ""}`}>
-        {showHeader ? <Header /> : null}
+        {showHeader ? <Header onOpenSetting={() => setSettingOpen(true)} /> : null}
         <motion.div
           initial={{ opacity: 0, y: 16 }}
           animate={{ opacity: 1, y: 0 }}
@@ -84,6 +88,7 @@ export function AppShell({ children, websites = [], showBottomNav = true, showHe
         </motion.div>
         {showBottomNav ? <BottomNav /> : null}
         <SearchModal websites={websites} />
+        <ImageDrawSettings drawKey={drawKey} open={settingOpen} onClose={() => setSettingOpen(false)} />
       </section>
     </main>
   );

@@ -4,7 +4,6 @@ import { AppShell } from "@/components/app-shell";
 import { JournalHeader, JournalList } from "@/components/journal-list";
 import type { Route } from "next";
 import { useRouter } from "next/navigation";
-import { privateShortcuts } from "@/utils/private-shortcuts";
 import type { WebsiteShortcut } from "@/types/app";
 
 const instagramWebLoginUrl = "https://www.instagram.com/accounts/login/";
@@ -47,7 +46,7 @@ const anotherInCard: WebsiteShortcut = {
 
 export default function SecretCategoriesPage() {
   const router = useRouter();
-  const secretCategoryItems = [anotherWMCard, anotherInCard, ...privateShortcuts];
+  const secretCategoryItems = [anotherWMCard, anotherInCard];
 
   return (
     <AppShell websites={secretCategoryItems} showHeader={false}>
