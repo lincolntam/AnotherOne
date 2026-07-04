@@ -1,7 +1,7 @@
 "use client";
 
 import { AnimatePresence, motion } from "framer-motion";
-import { LogOut, Menu, Search, UserRound } from "lucide-react";
+import { ArrowLeft, LogOut, Menu, Search, UserRound } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useState } from "react";
@@ -14,6 +14,7 @@ export function Header() {
   const setSearchOpen = useSearchStore((state) => state.setOpen);
   const logout = useAuthStore((state) => state.logout);
   const categoriesHref = pathname.startsWith("/secret/anotherwm") ? "/secret/anotherwm/categories" : pathname.startsWith("/secret") ? "/secret/categories" : "/categories";
+  const showSecretExit = pathname.startsWith("/secret/anotherwm");
 
   return (
     <header className="relative z-20 mb-16 mt-4 flex items-center justify-between">
@@ -40,6 +41,12 @@ export function Header() {
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: -8, scale: 0.98 }}
           >
+            {showSecretExit ? (
+              <Link className="flex items-center gap-3 rounded-2xl px-3 py-3 text-sm hover:bg-mist/70" href="/secret">
+                <ArrowLeft size={17} />
+                Exit
+              </Link>
+            ) : null}
             <Link className="flex items-center gap-3 rounded-2xl px-3 py-3 text-sm hover:bg-mist/70" href="/profile">
               <UserRound size={17} />
               Profile
