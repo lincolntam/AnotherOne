@@ -60,7 +60,7 @@ export default function AnotherWMImportPage() {
     }
 
     try {
-      const payload = JSON.parse(decodeURIComponent(raw)) as ImportPayload;
+      const payload = parseImportPayload(raw);
       const item = createWatchlistItem(payload);
       api<WatchlistItem>("/api/secret/watchlist", {
         method: "POST",
@@ -107,12 +107,41 @@ export default function AnotherWMImportPage() {
   );
 }
 
+function parseImportPayload(raw: string): ImportPayload {
+  const candidates = [raw];
+  try {
+    candidates.push(decodeURIComponent(raw));
+  } catch {
+    // Keep the original payload when it is already decoded.
+  }
+
+  for (const candidate of candidates) {
+    try {
+      return JSON.parse(candidate) as ImportPayload;
+    } catch {
+      // Try the next representation.
+    }
+  }
+
+  try {
+    const normalized = raw.replace(/-/gu, "+").replace(/_/gu, "/");
+    const decoded = decodeURIComponent(
+      Array.from(atob(normalized), (char) => `%${char.charCodeAt(0).toString(16).padStart(2, "0")}`).join("")
+    );
+    return JSON.parse(decoded) as ImportPayload;
+  } catch {
+    throw new Error("Invalid import payload");
+  }
+}
+
 function readImportDataFromUrl() {
-  const fromQuery = new URLSearchParams(window.location.search).get("data");
+  const queryParams = new URLSearchParams(window.location.search);
+  const fromQuery = queryParams.get("data") || queryParams.get("b64");
   if (fromQuery) return fromQuery;
 
   const hash = window.location.hash.replace(/^#/u, "");
-  const fromHash = new URLSearchParams(hash).get("data");
+  const hashParams = new URLSearchParams(hash);
+  const fromHash = hashParams.get("data") || hashParams.get("b64");
   return fromHash || "";
 }
 
