@@ -18,7 +18,7 @@ export function Header({ onOpenSetting }: HeaderProps) {
   const setSearchOpen = useSearchStore((state) => state.setOpen);
   const logout = useAuthStore((state) => state.logout);
   const categoriesHref = pathname.startsWith("/secret/anotherwm") ? "/secret/anotherwm/categories" : pathname.startsWith("/secret") ? "/secret/categories" : "/categories";
-  const showSecretExit = pathname.startsWith("/secret/anotherwm");
+  const secretExitHref = pathname.startsWith("/secret/anotherwm") ? "/secret" : pathname.startsWith("/secret") ? "/home" : "";
 
   return (
     <header className="relative z-20 mb-16 mt-4 flex items-center justify-between">
@@ -45,8 +45,8 @@ export function Header({ onOpenSetting }: HeaderProps) {
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: -8, scale: 0.98 }}
           >
-            {showSecretExit ? (
-              <Link className="flex items-center gap-3 rounded-2xl px-3 py-3 text-sm hover:bg-mist/70" href="/secret">
+            {secretExitHref ? (
+              <Link className="flex items-center gap-3 rounded-2xl px-3 py-3 text-sm hover:bg-mist/70" href={secretExitHref}>
                 <ArrowLeft size={17} />
                 Exit
               </Link>

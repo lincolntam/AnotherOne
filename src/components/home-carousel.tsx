@@ -6,7 +6,7 @@ import { useEffect, useState } from "react";
 import { ExternalCoverImage } from "@/components/external-cover-image";
 import { WebsiteCard } from "@/components/website-card";
 import type { WebsiteShortcut } from "@/types/app";
-import { DrawImage, getImageDrawKey, imageDrawChangedEvent, loadDrawImages, pickDrawImages } from "@/utils/image-draw";
+import { DrawImage, getImageDrawKey, imageDrawChangedEvent, loadDrawImages, loadDrawImagesFromDb, pickDrawImages } from "@/utils/image-draw";
 
 type HomeCarouselProps = {
   websites: WebsiteShortcut[];
@@ -23,8 +23,13 @@ export function HomeCarousel({ websites, onOpen }: HomeCarouselProps) {
   const imageDisplay = pickDrawImages(drawImages);
 
   useEffect(() => {
-    function loadImages() {
-      setDrawImages(loadDrawImages(drawKey));
+    async function loadImages() {
+      try {
+        const remoteImages = await loadDrawImagesFromDb(drawKey);
+        setDrawImages(remoteImages);
+      } catch {
+        setDrawImages(loadDrawImages(drawKey));
+      }
     }
 
     loadImages();

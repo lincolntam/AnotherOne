@@ -95,5 +95,5 @@ export function AppShell({ children, websites = [], showBottomNav = true, showHe
 }
 
 function isProtectedPath(pathname: string) {
-  return ["/home", "/profile", "/categories", "/websites", "/settings", "/secret"].some((path) => pathname === path || pathname.startsWith(`${path}/`));
+  return ["/home", "/profile", "/categories", "/websites", "/settings", "/secret", "/ltravellog"].some((path) => pathname === path || pathname.startsWith(`${path}/`));
 }

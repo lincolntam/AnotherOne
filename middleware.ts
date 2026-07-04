@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 
-const protectedPaths = ["/home", "/profile", "/categories", "/websites", "/settings", "/passcode", "/secret"];
+const protectedPaths = ["/home", "/profile", "/categories", "/websites", "/settings", "/passcode", "/secret", "/ltravellog"];
 const authCookie = process.env.SESSION_COOKIE_NAME || "ao_session";
 
 export function middleware(request: NextRequest) {
@@ -22,5 +22,5 @@ export function middleware(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/", "/login", "/home/:path*", "/profile/:path*", "/categories/:path*", "/websites/:path*", "/settings/:path*", "/passcode/:path*", "/secret/:path*"]
+  matcher: ["/", "/login", "/home/:path*", "/profile/:path*", "/categories/:path*", "/websites/:path*", "/settings/:path*", "/passcode/:path*", "/secret/:path*", "/ltravellog/:path*"]
 };

@@ -2,7 +2,7 @@
 
 import { Check, ImagePlus, Link as LinkIcon, Upload, X } from "lucide-react";
 import { ChangeEvent, useEffect, useState } from "react";
-import { DrawImage, getImageDrawLabel, loadDrawImages, saveDrawImages } from "@/utils/image-draw";
+import { DrawImage, getImageDrawLabel, loadDrawImages, loadDrawImagesFromDb, saveDrawImages, saveDrawImagesToDb } from "@/utils/image-draw";
 
 type ImageDrawSettingsProps = {
   drawKey: string;
@@ -12,11 +12,16 @@ type ImageDrawSettingsProps = {
 
 export function ImageDrawSettings({ drawKey, open, onClose }: ImageDrawSettingsProps) {
   const [draft, setDraft] = useState<DrawImage[]>([]);
+  const [saving, setSaving] = useState(false);
 
   useEffect(() => {
     if (!open) return;
-    const images = loadDrawImages(drawKey);
-    setDraft(images.length ? images : [createEmptyImage()]);
+    loadDrawImagesFromDb(drawKey)
+      .then((images) => setDraft(images.length ? images : [createEmptyImage()]))
+      .catch(() => {
+        const images = loadDrawImages(drawKey);
+        setDraft(images.length ? images : [createEmptyImage()]);
+      });
   }, [drawKey, open]);
 
   if (!open) return null;
@@ -29,9 +34,17 @@ export function ImageDrawSettings({ drawKey, open, onClose }: ImageDrawSettingsP
     setDraft((current) => [...current, createEmptyImage()]);
   }
 
-  function confirm() {
-    saveDrawImages(drawKey, draft);
-    onClose();
+  async function confirm() {
+    setSaving(true);
+    try {
+      await saveDrawImagesToDb(drawKey, draft);
+      onClose();
+    } catch {
+      saveDrawImages(drawKey, draft);
+      onClose();
+    } finally {
+      setSaving(false);
+    }
   }
 
   return (
@@ -80,7 +93,9 @@ export function ImageDrawSettings({ drawKey, open, onClose }: ImageDrawSettingsP
 
         <div className="mt-5 grid grid-cols-2 gap-3">
           <button className="rounded-full bg-paper px-4 py-3 text-sm font-bold text-ink" onClick={onClose}>Cancel</button>
-          <button className="rounded-full bg-ink px-4 py-3 text-sm font-bold text-white" onClick={confirm}>Confirm</button>
+          <button className="rounded-full bg-ink px-4 py-3 text-sm font-bold text-white disabled:opacity-50" onClick={confirm} disabled={saving}>
+            {saving ? "Saving" : "Confirm"}
+          </button>
         </div>
       </section>
     </div>

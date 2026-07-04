@@ -30,9 +30,28 @@ export function loadDrawImages(key: string): DrawImage[] {
   }
 }
 
+export async function loadDrawImagesFromDb(key: string): Promise<DrawImage[]> {
+  const response = await fetch(`/api/image-draw?key=${encodeURIComponent(key)}`);
+  if (!response.ok) throw new Error("Load image draw failed.");
+  const payload = (await response.json()) as { data?: DrawImage[] };
+  return payload.data || [];
+}
+
 export function saveDrawImages(key: string, images: DrawImage[]) {
   window.localStorage.setItem(storageKey(key), JSON.stringify(images.filter((item) => item.url)));
   window.dispatchEvent(new CustomEvent(imageDrawChangedEvent, { detail: { key } }));
+}
+
+export async function saveDrawImagesToDb(key: string, images: DrawImage[]) {
+  const cleanImages = images.filter((item) => item.url);
+  const response = await fetch(`/api/image-draw?key=${encodeURIComponent(key)}`, {
+    method: "PUT",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ images: cleanImages })
+  });
+  if (!response.ok) throw new Error("Save image draw failed.");
+  saveDrawImages(key, cleanImages);
+  return cleanImages;
 }
 
 export function pickDrawImages(images: DrawImage[]) {
