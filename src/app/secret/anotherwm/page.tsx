@@ -9,8 +9,9 @@ import { AppShell } from "@/components/app-shell";
 import { HomeCarousel } from "@/components/home-carousel";
 import { api } from "@/lib/api";
 import type { WatchlistItem } from "@/types/watchlist";
+import type { WebsiteShortcut } from "@/types/app";
 import { anotherWMShortcuts } from "@/utils/anotherwm-shortcuts";
-import { upsertWatchlistItem } from "@/utils/watchlist-storage";
+import { loadWatchlist, upsertWatchlistItem } from "@/utils/watchlist-storage";
 
 export default function AnotherWMPage() {
   const router = useRouter();
@@ -19,6 +20,7 @@ export default function AnotherWMPage() {
   const [url, setUrl] = useState("");
   const [saving, setSaving] = useState(false);
   const [message, setMessage] = useState("");
+  const [watchlistCards, setWatchlistCards] = useState<WebsiteShortcut[]>(anotherWMShortcuts);
 
   useEffect(() => {
     if (window.sessionStorage.getItem("anotherone-secret-unlocked") === "true") {
@@ -31,6 +33,13 @@ export default function AnotherWMPage() {
     }
     router.replace("/passcode");
   }, [router]);
+
+  useEffect(() => {
+    if (!allowed) return;
+    api<WatchlistItem[]>("/api/secret/watchlist")
+      .then((items) => setWatchlistCards(toShortcutCards(items)))
+      .catch(() => setWatchlistCards(toShortcutCards(loadWatchlist())));
+  }, [allowed]);
 
   useEffect(() => {
     function openAdd() {
@@ -54,6 +63,10 @@ export default function AnotherWMPage() {
         method: "POST",
         body: JSON.stringify({ url: value })
       });
+      await api<WatchlistItem>("/api/secret/watchlist", {
+        method: "POST",
+        body: JSON.stringify(item)
+      });
       upsertWatchlistItem(item);
       setUrl("");
       setAddOpen(false);
@@ -68,13 +81,13 @@ export default function AnotherWMPage() {
   if (!allowed) return null;
 
   return (
-    <AppShell websites={anotherWMShortcuts}>
+    <AppShell websites={watchlistCards}>
       <div className="-mt-2 mb-4 flex items-center justify-center gap-2 text-[10px] font-bold uppercase tracking-[0.2em] text-graphite/45">
         <EyeOff size={14} />
         AnotherWM Private
       </div>
       <HomeCarousel
-        websites={anotherWMShortcuts}
+        websites={watchlistCards}
         onOpen={(website) => {
           if (website.url.startsWith("/")) router.push(website.url as Route);
           else window.open(website.url, "_blank", "noopener,noreferrer");
@@ -134,4 +147,25 @@ export default function AnotherWMPage() {
       </AnimatePresence>
     </AppShell>
   );
+}
+
+function toShortcutCards(items: WatchlistItem[]): WebsiteShortcut[] {
+  if (!items.length) return anotherWMShortcuts;
+  return items.slice(0, 8).map((item, index) => ({
+    id: item.id,
+    userId: "secret",
+    title: item.code || item.title,
+    description: item.title,
+    url: `/secret/anotherwm/list/${encodeURIComponent(item.id)}`,
+    imageUrl: item.coverUrl,
+    category: "AnotherWM",
+    displayOrder: index + 1,
+    active: true,
+    favorite: true,
+    pinned: true,
+    clickCount: 0,
+    lastUsedAt: item.releaseDate || item.savedAt,
+    createdAt: item.savedAt,
+    updatedAt: item.savedAt
+  }));
 }

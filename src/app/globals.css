@@ -19,14 +19,15 @@
 }
 
 html {
-  height: 100%;
-  overflow: hidden;
+  min-height: 100%;
+  overflow-x: hidden;
 }
 
 body {
   margin: 0;
-  height: 100%;
-  overflow: hidden;
+  min-height: 100%;
+  overflow-x: hidden;
+  overflow-y: auto;
   background:
     radial-gradient(circle at 82% 8%, rgba(255, 255, 255, 0.85), transparent 9rem),
     radial-gradient(circle at 18% 18%, rgba(255, 255, 255, 0.72), transparent 11rem),
@@ -47,16 +48,16 @@ select {
 
 @layer components {
   .ao-shell {
-    height: 100dvh;
-    height: 100svh;
-    @apply mx-auto flex w-full max-w-md items-center justify-center overflow-hidden px-3 py-3;
+    min-height: 100dvh;
+    min-height: 100svh;
+    @apply mx-auto flex w-full max-w-md items-start justify-center overflow-visible px-3 py-3;
   }
 
   .ao-phone {
-    height: calc(100dvh - 1.5rem);
-    height: calc(100svh - 1.5rem);
+    min-height: calc(100dvh - 1.5rem);
+    min-height: calc(100svh - 1.5rem);
     max-height: 932px;
-    @apply relative w-full overflow-hidden rounded-[34px] bg-white px-5 pb-24 pt-5 shadow-journal;
+    @apply relative w-full overflow-x-hidden rounded-[34px] bg-white px-5 pb-24 pt-5 shadow-journal;
   }
 
   @media (display-mode: standalone), (max-width: 520px) {
@@ -70,17 +71,21 @@ select {
     }
 
     .ao-phone {
-      height: 100dvh;
-      height: 100svh;
+      min-height: 100dvh;
+      min-height: 100svh;
       @apply max-h-none max-w-none rounded-none shadow-none;
-      padding-top: calc(env(safe-area-inset-top, 0px) + 1.25rem);
+      padding-top: max(env(safe-area-inset-top, 0px), 0.25rem);
       padding-bottom: calc(env(safe-area-inset-bottom, 0px) + 6rem);
+    }
+
+    .ao-phone::before {
+      display: none;
     }
   }
 
   .ao-phone::before {
     content: "";
-    @apply absolute left-1/2 top-3 h-1.5 w-20 -translate-x-1/2 rounded-full bg-black/5;
+    @apply pointer-events-none absolute left-1/2 top-3 h-1.5 w-20 -translate-x-1/2 rounded-full bg-black/5;
   }
 
   .ao-card {

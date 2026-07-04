@@ -9,6 +9,14 @@ export function getDb() {
   return context.env.DB;
 }
 
+export function getAppDb() {
+  const context = getCloudflareContext();
+  if (!context.env.APP_DB) {
+    throw new Error("Cloudflare D1 binding APP_DB is not configured.");
+  }
+  return context.env.APP_DB;
+}
+
 export function getEnv() {
   return getCloudflareContext().env;
 }

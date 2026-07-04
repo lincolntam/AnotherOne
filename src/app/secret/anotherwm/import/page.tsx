@@ -5,6 +5,7 @@ import type { Route } from "next";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { AppShell } from "@/components/app-shell";
+import { api } from "@/lib/api";
 import type { WatchlistGenre, WatchlistItem, WatchlistPerson } from "@/types/watchlist";
 import { upsertWatchlistItem } from "@/utils/watchlist-storage";
 
@@ -50,11 +51,30 @@ export default function AnotherWMImportPage() {
     try {
       const payload = JSON.parse(decodeURIComponent(raw)) as ImportPayload;
       const item = createWatchlistItem(payload);
-      upsertWatchlistItem(item);
-      window.sessionStorage.removeItem(pendingImportKey);
-      setStatus("saved");
-      setMessage("Saved to AnotherWM.");
-      window.setTimeout(() => router.replace(`/secret/anotherwm/list/${encodeURIComponent(item.id)}` as Route), 650);
+      api<WatchlistItem>("/api/secret/watchlist", {
+        method: "POST",
+        body: JSON.stringify(item)
+      })
+        .then((saved) => {
+          upsertWatchlistItem(saved);
+          window.sessionStorage.removeItem(pendingImportKey);
+          setStatus("saved");
+          setMessage("Saved to AnotherWM.");
+          window.setTimeout(() => router.replace(`/secret/anotherwm/list/${encodeURIComponent(saved.id)}` as Route), 650);
+        })
+        .catch((error) => {
+          if (error instanceof Error && error.message === "Unauthorized") {
+            window.sessionStorage.setItem("anotherone-secret-redirect", "/secret/anotherwm/import");
+            router.replace("/login?next=/secret/anotherwm/import");
+            return;
+          }
+
+          upsertWatchlistItem(item);
+          window.sessionStorage.removeItem(pendingImportKey);
+          setStatus("saved");
+          setMessage("Saved locally. Cloud sync is unavailable.");
+          window.setTimeout(() => router.replace(`/secret/anotherwm/list/${encodeURIComponent(item.id)}` as Route), 650);
+        });
     } catch {
       setStatus("error");
       setMessage("Import data is not valid.");

@@ -14,6 +14,7 @@ type WebsiteCardProps = {
 
 export function WebsiteCard({ website, onOpen, compact = false, featured = false }: WebsiteCardProps) {
   const hasCoverImage = isCoverImage(website.imageUrl);
+  const isPrivateCard = website.userId === "secret";
 
   if (featured) {
     return (
@@ -29,10 +30,16 @@ export function WebsiteCard({ website, onOpen, compact = false, featured = false
           <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_18%,rgba(255,255,255,0.78),transparent_7rem),linear-gradient(145deg,#dfe7dd_0%,#c8d7dd_46%,#d9bca7_100%)]" />
         )}
         <div className="absolute inset-0 bg-gradient-to-b from-black/18 via-transparent to-black/35" />
-        <div className="absolute left-7 top-7 text-white">
-          <span className="block text-5xl font-light leading-none">{String(new Date().getDate()).padStart(2, "0")}</span>
-          <span className="mt-1 block text-lg font-semibold uppercase tracking-wide">{new Date().toLocaleDateString("en-US", { month: "short" })}</span>
-        </div>
+        {isPrivateCard ? (
+          <div className="absolute left-6 top-7 max-h-[160px] text-white">
+            <span className="block text-[11px] font-bold uppercase leading-4 tracking-[0.18em] [writing-mode:vertical-rl]">{website.title}</span>
+          </div>
+        ) : (
+          <div className="absolute left-7 top-7 text-white">
+            <span className="block text-5xl font-light leading-none">{String(new Date().getDate()).padStart(2, "0")}</span>
+            <span className="mt-1 block text-lg font-semibold uppercase tracking-wide">{new Date().toLocaleDateString("en-US", { month: "short" })}</span>
+          </div>
+        )}
         <div className="absolute bottom-7 left-7 right-7 text-white">
           <p className="mb-2 text-[10px] font-semibold uppercase tracking-[0.2em] opacity-80">{website.category}</p>
           <h3 className="text-2xl font-semibold leading-tight">{website.title}</h3>

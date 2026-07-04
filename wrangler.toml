@@ -8,6 +8,11 @@ binding = "DB"
 database_name = "global_login"
 database_id = "6f542b4b-2d77-4eaf-a0d3-b5038039bae7"
 
+[[d1_databases]]
+binding = "APP_DB"
+database_name = "anotherone_items"
+database_id = "185191a6-4754-4937-8ba0-bfd8d3b889bc"
+
 [vars]
 NEXT_PUBLIC_APP_NAME = "AnotherOne"
 SESSION_COOKIE_NAME = "ao_session"

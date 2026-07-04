@@ -28,7 +28,9 @@ export default function AnotherWMDetailPage() {
 
       setAllowed(true);
       const id = decodeURIComponent(params.id);
-      const saved = findWatchlistItem(id);
+      const saved = await api<WatchlistItem[]>("/api/secret/watchlist")
+        .then((items) => items.find((entry) => entry.id === id))
+        .catch(() => findWatchlistItem(id));
 
       if (saved) {
         if (!cancelled) {
@@ -42,6 +44,10 @@ export default function AnotherWMDetailPage() {
         const fetched = await api<WatchlistItem>("/api/secret/watchlist/metadata", {
           method: "POST",
           body: JSON.stringify({ url: createSourceUrl(id) })
+        });
+        await api<WatchlistItem>("/api/secret/watchlist", {
+          method: "POST",
+          body: JSON.stringify(fetched)
         });
         upsertWatchlistItem(fetched);
         if (!cancelled) setItem(fetched);

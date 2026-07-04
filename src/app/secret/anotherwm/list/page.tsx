@@ -7,6 +7,7 @@ import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { AppShell } from "@/components/app-shell";
 import { JournalHeader } from "@/components/journal-list";
+import { api } from "@/lib/api";
 import type { WatchlistItem } from "@/types/watchlist";
 import { loadWatchlist } from "@/utils/watchlist-storage";
 import { anotherWMShortcuts } from "@/utils/anotherwm-shortcuts";
@@ -22,7 +23,9 @@ export default function AnotherWMListPage() {
       return;
     }
     setAllowed(true);
-    setItems(loadWatchlist());
+    api<WatchlistItem[]>("/api/secret/watchlist")
+      .then(setItems)
+      .catch(() => setItems(loadWatchlist()));
   }, [router]);
 
   if (!allowed) return null;
