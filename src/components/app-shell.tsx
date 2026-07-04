@@ -23,7 +23,7 @@ export function AppShell({ children, websites = [], showBottomNav = true, showHe
   const user = useAuthStore((state) => state.user);
   const [checked, setChecked] = useState(false);
   const requiresAuth = isProtectedPath(pathname);
-  const fullScreen = pathname.startsWith("/secret/anotherwm/list/");
+  const fullScreen = pathname.startsWith("/secret/anotherwm/list/") || pathname.startsWith("/secret/anotherin");
 
   useEffect(() => {
     let cancelled = false;
