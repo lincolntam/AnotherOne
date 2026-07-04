@@ -8,6 +8,8 @@ export type WatchlistGenre = {
   url?: string;
 };
 
+export type WatchlistStatus = "Pending" | "Watched" | "Again";
+
 export type WatchlistItem = {
   id: string;
   sourceUrl: string;
@@ -19,5 +21,6 @@ export type WatchlistItem = {
   actresses: WatchlistPerson[];
   genres: WatchlistGenre[];
   releaseDate: string;
+  status: WatchlistStatus;
   savedAt: string;
 };

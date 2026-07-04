@@ -1,6 +1,6 @@
 "use client";
 
-import { ArrowLeft, CalendarDays, ExternalLink, EyeOff, Tag, UserRound } from "lucide-react";
+import { ArrowLeft, CalendarDays, ExternalLink, EyeOff, MoreHorizontal, Tag, UserRound, X } from "lucide-react";
 import type { Route } from "next";
 import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
@@ -8,9 +8,9 @@ import { useEffect, useState } from "react";
 import { AppShell } from "@/components/app-shell";
 import { ExternalCoverImage } from "@/components/external-cover-image";
 import { api } from "@/lib/api";
-import type { WatchlistItem } from "@/types/watchlist";
+import type { WatchlistItem, WatchlistStatus } from "@/types/watchlist";
 import { isDirtyWatchlistItem } from "@/utils/watchlist-sanitize";
-import { findWatchlistItem, upsertWatchlistItem } from "@/utils/watchlist-storage";
+import { findWatchlistItem, removeWatchlistItem, upsertWatchlistItem } from "@/utils/watchlist-storage";
 
 const actressTitle = "Actress";
 const genreTitle = "Genre";
@@ -21,6 +21,7 @@ export default function AnotherWMDetailPage() {
   const [item, setItem] = useState<WatchlistItem | null>(null);
   const [allowed, setAllowed] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [menuOpen, setMenuOpen] = useState(false);
 
   useEffect(() => {
     let cancelled = false;
@@ -112,14 +113,14 @@ export default function AnotherWMDetailPage() {
   return (
     <AppShell showHeader={false} showBottomNav={false}>
       <article className="min-h-[680px] overflow-hidden rounded-[34px] bg-white text-ink">
-        <div className="relative h-[245px] w-full bg-paper">
+        <div className="relative h-[260px] w-full bg-paper">
           <ExternalCoverImage src={item.coverUrl} />
-          <Link href="/secret/anotherwm/list" aria-label="Back" className="absolute left-4 top-5 inline-flex h-10 w-10 items-center justify-center rounded-full bg-white/85 text-ink shadow-sm backdrop-blur">
+          <Link href="/secret/anotherwm/list" aria-label="Back" className="absolute left-4 top-5 inline-flex h-10 w-10 items-center justify-center rounded-full bg-white/90 text-ink shadow-sm backdrop-blur">
             <ArrowLeft size={18} />
           </Link>
         </div>
 
-        <div className="space-y-6 px-7 py-6">
+        <div className="space-y-5 px-7 py-6">
           <div className="flex items-center justify-center gap-2 text-[10px] font-bold uppercase tracking-[0.2em] text-graphite/45">
             <EyeOff size={14} />
             AnotherWM
@@ -142,13 +143,62 @@ export default function AnotherWMDetailPage() {
             {item.genres.map((genre) => <MetaLink key={genre.name} kind="genre" name={genre.name} url={genre.url} />)}
           </MetaSection>
 
+          <MetaSection icon={<Tag size={16} />} title="Tag">
+            {(["Pending", "Watched", "Again"] as WatchlistStatus[]).map((status) => (
+              <button
+                key={status}
+                className={`rounded-full px-3 py-2 text-xs font-semibold transition ${item.status === status ? "bg-ink text-white" : "bg-paper text-ink hover:bg-mist"}`}
+                onClick={() => updateStatus(status)}
+              >
+                {status}
+              </button>
+            ))}
+          </MetaSection>
+
           <button className="w-full rounded-full bg-ink px-5 py-3 text-sm font-semibold text-white shadow-[0_14px_28px_rgba(0,0,0,0.16)]" onClick={() => window.open(item.sourceUrl, "_blank", "noopener,noreferrer")}>
             Open source
           </button>
+
+          <div className="relative flex items-center justify-between pt-1">
+            <button className="inline-flex h-11 w-11 items-center justify-center rounded-full text-ink transition hover:bg-paper" aria-label="More actions" onClick={() => setMenuOpen((open) => !open)}>
+              <MoreHorizontal size={22} />
+            </button>
+            <Link href="/secret/anotherwm/list" aria-label="Close" className="inline-flex h-11 w-11 items-center justify-center rounded-full text-ink transition hover:bg-paper">
+              <X size={18} />
+            </Link>
+            {menuOpen ? (
+              <div className="absolute bottom-12 left-0 z-10 w-44 rounded-2xl border border-black/[0.04] bg-white p-2 text-left shadow-[0_18px_40px_rgba(0,0,0,0.14)]">
+                <button className="w-full rounded-xl px-3 py-2 text-left text-xs font-bold text-rose-500 transition hover:bg-rose-50" onClick={removeItem}>
+                  Remove from list
+                </button>
+              </div>
+            ) : null}
+          </div>
         </div>
       </article>
     </AppShell>
   );
+
+  function updateStatus(status: WatchlistStatus) {
+    if (!item) return;
+    const next = { ...item, status };
+    setItem(next);
+    upsertWatchlistItem(next);
+    api<WatchlistItem>("/api/secret/watchlist", {
+      method: "POST",
+      body: JSON.stringify(next)
+    }).catch(() => undefined);
+  }
+
+  function removeItem() {
+    if (!item) return;
+    removeWatchlistItem(item.id);
+    api<{ ok: boolean }>("/api/secret/watchlist", {
+      method: "DELETE",
+      body: JSON.stringify({ id: item.id, sourceUrl: item.sourceUrl })
+    }).catch(() => undefined);
+    router.replace("/secret/anotherwm/list");
+  }
 }
 
 function createSourceUrl(id: string) {

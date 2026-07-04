@@ -10,6 +10,7 @@ create table if not exists anotherwm_watchlist_items (
   actresses_json text not null default '[]',
   genres_json text not null default '[]',
   release_date text not null default '',
+  status text not null default 'Pending',
   saved_at text not null,
   updated_at text not null default (datetime('now')),
   unique(user_id, source_url)

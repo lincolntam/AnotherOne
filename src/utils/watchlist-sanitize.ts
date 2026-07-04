@@ -18,6 +18,7 @@ export function normalizeWatchlistItem(item: WatchlistItem): WatchlistItem {
     actresses: sanitizePeople(item.actresses),
     genres: sanitizeGenres(item.genres),
     releaseDate: cleanReleaseDate(item.releaseDate),
+    status: normalizeStatus(item.status),
     savedAt: cleanText(item.savedAt)
   };
 }
@@ -47,6 +48,10 @@ export function cleanText(value: string) {
 
 export function normalizeCode(value: string) {
   return cleanText(value).replace(/[_\s]+/gu, "-").toUpperCase();
+}
+
+function normalizeStatus(value: string | undefined) {
+  return value === "Watched" || value === "Again" ? value : "Pending";
 }
 
 function sanitizeLinks<T extends WatchlistLink>(items: T[] | undefined, options: { requiredPath: string; maxItems: number }) {

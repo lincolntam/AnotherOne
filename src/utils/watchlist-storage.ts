@@ -26,6 +26,12 @@ export function upsertWatchlistItem(item: WatchlistItem) {
   return next;
 }
 
+export function removeWatchlistItem(id: string) {
+  const next = loadWatchlist().filter((entry) => entry.id !== id && entry.sourceUrl !== id);
+  saveWatchlist(next);
+  return next;
+}
+
 export function findWatchlistItem(id: string) {
   return loadWatchlist().find((item) => item.id === id);
 }

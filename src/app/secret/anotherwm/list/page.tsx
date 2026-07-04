@@ -25,11 +25,12 @@ function AnotherWMListContent() {
   const searchParams = useSearchParams();
   const actressFilter = searchParams.get("actress") || "";
   const genreFilter = searchParams.get("genre") || "";
+  const statusFilter = searchParams.get("status") || "";
   const urlFilter = searchParams.get("url") || "";
   const [allowed, setAllowed] = useState(false);
   const [items, setItems] = useState<WatchlistItem[]>([]);
-  const filteredItems = items.filter((item) => matchesFilter(item, { actressFilter, genreFilter, urlFilter }));
-  const filterLabel = actressFilter || genreFilter;
+  const filteredItems = items.filter((item) => matchesFilter(item, { actressFilter, genreFilter, statusFilter, urlFilter }));
+  const filterLabel = actressFilter || genreFilter || statusFilter;
 
   useEffect(() => {
     if (window.sessionStorage.getItem("anotherone-secret-unlocked") !== "true") {
@@ -84,9 +85,10 @@ function AnotherWMListContent() {
   );
 }
 
-function matchesFilter(item: WatchlistItem, filters: { actressFilter: string; genreFilter: string; urlFilter: string }) {
+function matchesFilter(item: WatchlistItem, filters: { actressFilter: string; genreFilter: string; statusFilter: string; urlFilter: string }) {
   if (filters.actressFilter) return item.actresses.some((person) => sameTag(person.name, filters.actressFilter) || sameTag(person.url || "", filters.urlFilter));
   if (filters.genreFilter) return item.genres.some((genre) => sameTag(genre.name, filters.genreFilter) || sameTag(genre.url || "", filters.urlFilter));
+  if (filters.statusFilter) return sameTag(item.status || "Pending", filters.statusFilter);
   return true;
 }
 

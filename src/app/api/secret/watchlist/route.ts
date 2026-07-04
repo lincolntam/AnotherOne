@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { handleApiError } from "@/lib/api-errors";
 import { requireUser } from "@/services/auth-service";
-import { listWatchlistItems, saveWatchlistItem } from "@/services/watchlist-service";
+import { deleteWatchlistItem, listWatchlistItems, saveWatchlistItem } from "@/services/watchlist-service";
 import type { WatchlistItem } from "@/types/watchlist";
 
 export async function GET() {
@@ -18,6 +18,18 @@ export async function POST(request: Request) {
     const user = await requireUser();
     const body = (await request.json()) as WatchlistItem;
     return NextResponse.json({ data: await saveWatchlistItem(user, body) });
+  } catch (error) {
+    return handleApiError(error);
+  }
+}
+
+export async function DELETE(request: Request) {
+  try {
+    const user = await requireUser();
+    const body = (await request.json().catch(() => ({}))) as { id?: string; sourceUrl?: string };
+    const id = body.id || body.sourceUrl || "";
+    if (!id) return NextResponse.json({ error: "id is required." }, { status: 400 });
+    return NextResponse.json({ data: await deleteWatchlistItem(user, id) });
   } catch (error) {
     return handleApiError(error);
   }

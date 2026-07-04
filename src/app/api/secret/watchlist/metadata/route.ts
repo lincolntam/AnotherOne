@@ -53,6 +53,7 @@ export async function POST(request: Request) {
         actresses: uniqueByName(extractLabelLinks<WatchlistPerson>(html, actressLabel, parsed)),
         genres: uniqueByName(extractLabelLinks<WatchlistGenre>(html, genreLabel, parsed)),
         releaseDate: extractReleaseDate(html),
+        status: "Pending",
         savedAt: new Date().toISOString()
       };
 
@@ -94,6 +95,7 @@ function createFallbackItem(sourceUrl: string, site: WatchlistItem["site"]): Wat
     actresses: [],
     genres: [],
     releaseDate: "",
+    status: "Pending",
     savedAt: new Date().toISOString()
   };
 }
@@ -124,7 +126,8 @@ async function enrichMissingMetadata(item: WatchlistItem, currentUrl: string): P
       actresses: item.actresses.length ? item.actresses : extra.actresses,
       genres: item.genres.length ? item.genres : extra.genres,
       releaseDate: item.releaseDate || extra.releaseDate,
-      previewUrl: item.previewUrl || extra.previewUrl
+      previewUrl: item.previewUrl || extra.previewUrl,
+      status: item.status || extra.status
     };
 
     if (hasCoreMetadata(merged)) return merged;

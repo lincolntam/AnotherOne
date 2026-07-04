@@ -166,6 +166,7 @@ function createWatchlistItem(payload: ImportPayload): WatchlistItem {
     actresses: sanitizePeople(payload.actresses?.length ? payload.actresses : textToLinks(readAnyLabel(rawText, actressLabels))),
     genres: sanitizeGenres(payload.genres?.length ? payload.genres : textToLinks(readAnyLabel(rawText, genreLabels))),
     releaseDate: cleanReleaseDate(payload.releaseDate || readAnyLabel(rawText, releaseDateLabels)),
+    status: "Pending",
     savedAt: new Date().toISOString()
   });
 }
