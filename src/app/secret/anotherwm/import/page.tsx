@@ -40,8 +40,11 @@ export default function AnotherWMImportPage() {
   const [message, setMessage] = useState("Reading bookmark data...");
 
   useEffect(() => {
-    const fromQuery = new URLSearchParams(window.location.search).get("data");
-    if (fromQuery) window.sessionStorage.setItem(pendingImportKey, fromQuery);
+    const fromUrl = readImportDataFromUrl();
+    if (fromUrl) {
+      window.sessionStorage.setItem(pendingImportKey, fromUrl);
+      if (window.location.hash) window.history.replaceState(null, "", window.location.pathname + window.location.search);
+    }
 
     if (window.sessionStorage.getItem("anotherone-secret-unlocked") !== "true") {
       window.sessionStorage.setItem("anotherone-secret-redirect", "/secret/anotherwm/import");
@@ -49,7 +52,7 @@ export default function AnotherWMImportPage() {
       return;
     }
 
-    const raw = fromQuery || window.sessionStorage.getItem(pendingImportKey);
+    const raw = fromUrl || window.sessionStorage.getItem(pendingImportKey);
     if (!raw) {
       setStatus("error");
       setMessage("No import data found.");
@@ -102,6 +105,15 @@ export default function AnotherWMImportPage() {
       </main>
     </AppShell>
   );
+}
+
+function readImportDataFromUrl() {
+  const fromQuery = new URLSearchParams(window.location.search).get("data");
+  if (fromQuery) return fromQuery;
+
+  const hash = window.location.hash.replace(/^#/u, "");
+  const fromHash = new URLSearchParams(hash).get("data");
+  return fromHash || "";
 }
 
 function createWatchlistItem(payload: ImportPayload): WatchlistItem {
