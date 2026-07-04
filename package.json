@@ -8,8 +8,10 @@
     "start": "next start",
     "lint": "eslint . --max-warnings=0",
     "typecheck": "tsc --noEmit",
-    "pages:build": "opennextjs-cloudflare build",
-    "pages:deploy": "opennextjs-cloudflare deploy",
+    "pages:build": "opennextjs-cloudflare build && node scripts/prepare-pages-output.mjs",
+    "pages:deploy": "wrangler pages deploy .open-next-pages --project-name anotherone",
+    "worker:build": "opennextjs-cloudflare build",
+    "worker:deploy": "opennextjs-cloudflare deploy",
     "d1:migrate:local": "wrangler d1 migrations apply global_login --local",
     "d1:migrate:remote": "wrangler d1 migrations apply global_login --remote"
   },
