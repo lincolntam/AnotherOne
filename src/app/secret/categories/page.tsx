@@ -7,6 +7,8 @@ import { useRouter } from "next/navigation";
 import { privateShortcuts } from "@/utils/private-shortcuts";
 import type { WebsiteShortcut } from "@/types/app";
 
+const instagramWebLoginUrl = "https://www.instagram.com/accounts/login/";
+
 const anotherWMCard: WebsiteShortcut = {
   id: "secret-anotherwm",
   userId: "secret",
@@ -30,7 +32,7 @@ const anotherInCard: WebsiteShortcut = {
   userId: "secret",
   title: "AnotherIn",
   description: "Private Instagram viewer.",
-  url: "/secret/anotherin",
+  url: instagramWebLoginUrl,
   imageUrl: "",
   category: "Room",
   displayOrder: 1,
@@ -58,7 +60,7 @@ export default function SecretCategoriesPage() {
             return;
           }
           if (item.id === "secret-anotherin") {
-            router.push("/secret/anotherin" as Route);
+            window.open(instagramWebLoginUrl, "_blank", "noopener,noreferrer");
             return;
           }
           window.open(item.url, "_blank", "noopener,noreferrer");
