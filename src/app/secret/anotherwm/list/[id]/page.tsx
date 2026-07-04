@@ -8,6 +8,7 @@ import { AppShell } from "@/components/app-shell";
 import { ExternalCoverImage } from "@/components/external-cover-image";
 import { api } from "@/lib/api";
 import type { WatchlistItem } from "@/types/watchlist";
+import { isDirtyWatchlistItem } from "@/utils/watchlist-sanitize";
 import { findWatchlistItem, upsertWatchlistItem } from "@/utils/watchlist-storage";
 
 const actressTitle = "Actress";
@@ -167,7 +168,7 @@ async function refreshWatchlistItem(item: WatchlistItem) {
 }
 
 function shouldRefresh(item: WatchlistItem) {
-  return !item.coverUrl || !item.releaseDate || !item.genres.length || item.actresses.some((person) => /ranking|\u6392\u884c/iu.test(`${person.name} ${person.url || ""}`));
+  return !item.releaseDate || !item.genres.length || isDirtyWatchlistItem(item);
 }
 
 function InfoPill({ icon, label }: { icon: React.ReactNode; label: string }) {

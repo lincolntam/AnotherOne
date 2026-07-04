@@ -1,6 +1,7 @@
 import { createId, getAppDb, nowIso } from "@/lib/d1";
 import type { AppUser } from "@/types/app";
 import type { WatchlistGenre, WatchlistItem, WatchlistPerson } from "@/types/watchlist";
+import { normalizeWatchlistItem as normalizeWatchlistPayload } from "@/utils/watchlist-sanitize";
 
 type WatchlistRow = {
   id: string;
@@ -72,19 +73,7 @@ export async function saveWatchlistItem(user: AppUser, item: WatchlistItem) {
 }
 
 function normalizeWatchlistItem(item: WatchlistItem): WatchlistItem {
-  return {
-    id: cleanText(item.id),
-    sourceUrl: cleanText(item.sourceUrl),
-    site: item.site === "missav" || item.site === "jable" ? item.site : "unknown",
-    title: cleanText(item.title || item.code || item.sourceUrl),
-    code: cleanText(item.code),
-    coverUrl: cleanText(item.coverUrl),
-    previewUrl: cleanText(item.previewUrl || ""),
-    actresses: normalizeLinks(item.actresses),
-    genres: normalizeLinks(item.genres),
-    releaseDate: cleanText(item.releaseDate),
-    savedAt: cleanText(item.savedAt || nowIso())
-  };
+  return normalizeWatchlistPayload({ ...item, savedAt: item.savedAt || nowIso() });
 }
 
 function toWatchlistItem(row: WatchlistRow): WatchlistItem {
@@ -110,13 +99,4 @@ function parseLinks<T>(value: string): T[] {
   } catch {
     return [];
   }
-}
-
-function normalizeLinks<T extends { name: string; url?: string }>(items: T[]) {
-  if (!Array.isArray(items)) return [];
-  return items.map((item) => ({ name: cleanText(item.name), url: cleanText(item.url || "") || undefined })).filter((item) => item.name);
-}
-
-function cleanText(value: string) {
-  return String(value || "").replace(/\s+/gu, " ").trim();
 }

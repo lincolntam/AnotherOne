@@ -7,6 +7,7 @@ import { useEffect, useState } from "react";
 import { AppShell } from "@/components/app-shell";
 import { api } from "@/lib/api";
 import type { WatchlistGenre, WatchlistItem, WatchlistPerson } from "@/types/watchlist";
+import { cleanReleaseDate, cleanText, normalizeCode, normalizeWatchlistItem, sanitizeGenres, sanitizePeople } from "@/utils/watchlist-sanitize";
 import { upsertWatchlistItem } from "@/utils/watchlist-storage";
 
 type ImportPayload = {
@@ -152,9 +153,9 @@ function createWatchlistItem(payload: ImportPayload): WatchlistItem {
   const rawText = cleanText(payload.selectedText || payload.rawText || payload.description || "");
   const site = getSite(payload.site || sourceUrl);
   const code = normalizeCode(payload.code || readAnyLabel(rawText, codeLabels) || extractCode(sourceUrl) || extractCode(payload.title || "") || extractCode(rawText));
-  const title = cleanText(payload.title || readAnyLabel(rawText, titleLabels) || code || sourceUrl);
+  const title = cleanTitle(payload.title || readAnyLabel(rawText, titleLabels) || code || sourceUrl, code);
 
-  return {
+  return normalizeWatchlistItem({
     id: createId(code, sourceUrl),
     sourceUrl,
     site,
@@ -162,11 +163,11 @@ function createWatchlistItem(payload: ImportPayload): WatchlistItem {
     code,
     coverUrl: normalizeUrl(payload.coverUrl || payload.cover || payload.imageUrl || ""),
     previewUrl: normalizeUrl(payload.previewUrl || ""),
-    actresses: normalizeLinks(payload.actresses?.length ? payload.actresses : textToLinks(readAnyLabel(rawText, actressLabels))),
-    genres: normalizeLinks(payload.genres?.length ? payload.genres : textToLinks(readAnyLabel(rawText, genreLabels))),
-    releaseDate: cleanText(payload.releaseDate || readAnyLabel(rawText, releaseDateLabels)),
+    actresses: sanitizePeople(payload.actresses?.length ? payload.actresses : textToLinks(readAnyLabel(rawText, actressLabels))),
+    genres: sanitizeGenres(payload.genres?.length ? payload.genres : textToLinks(readAnyLabel(rawText, genreLabels))),
+    releaseDate: cleanReleaseDate(payload.releaseDate || readAnyLabel(rawText, releaseDateLabels)),
     savedAt: new Date().toISOString()
-  };
+  });
 }
 
 function getSite(value: string): WatchlistItem["site"] {
@@ -181,24 +182,8 @@ function extractCode(value: string) {
   return match ? `${match[1]}-${match[2]}` : "";
 }
 
-function normalizeCode(value: string) {
-  return value.trim().replace(/[_\s]+/gu, "-").toUpperCase();
-}
-
 function createId(code: string, sourceUrl: string) {
   return (code || sourceUrl).toLowerCase().replace(/[^a-z0-9]+/gu, "-").replace(/^-|-$/gu, "") || crypto.randomUUID();
-}
-
-function normalizeLinks(items?: WatchlistPerson[]) {
-  if (!Array.isArray(items)) return [];
-  const seen = new Set<string>();
-  return items
-    .map((item) => ({ name: cleanText(item.name), url: normalizeUrl(item.url || "") || undefined }))
-    .filter((item) => {
-      if (!item.name || seen.has(item.name.toLowerCase())) return false;
-      seen.add(item.name.toLowerCase());
-      return true;
-    });
 }
 
 function normalizeUrl(value: string) {
@@ -236,8 +221,11 @@ function textToLinks(value: string): WatchlistPerson[] {
     .map((name) => ({ name }));
 }
 
-function cleanText(value: string) {
-  return value.replace(/\s+/gu, " ").trim();
+function cleanTitle(value: string, code: string) {
+  const title = cleanText(value);
+  if (!code) return title;
+  const escaped = escapeRegExp(code);
+  return title.replace(new RegExp(`^${escaped}\\s*[-:：]?\\s*${escaped}\\s*[-:：]?\\s*`, "iu"), `${code} `);
 }
 
 function escapeRegExp(value: string) {
