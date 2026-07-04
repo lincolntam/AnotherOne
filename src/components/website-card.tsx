@@ -2,7 +2,7 @@
 
 import { motion } from "framer-motion";
 import { ExternalLink, Heart, Pin } from "lucide-react";
-import Image from "next/image";
+import { ExternalCoverImage } from "@/components/external-cover-image";
 import type { WebsiteShortcut } from "@/types/app";
 
 type WebsiteCardProps = {
@@ -25,7 +25,7 @@ export function WebsiteCard({ website, onOpen, compact = false, featured = false
         onClick={() => onOpen(website)}
       >
         {hasCoverImage ? (
-          <Image src={website.imageUrl} alt="" fill className="object-cover" unoptimized />
+          <ExternalCoverImage src={website.imageUrl} />
         ) : (
           <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_18%,rgba(255,255,255,0.78),transparent_7rem),linear-gradient(145deg,#dfe7dd_0%,#c8d7dd_46%,#d9bca7_100%)]" />
         )}
@@ -58,7 +58,7 @@ export function WebsiteCard({ website, onOpen, compact = false, featured = false
     >
       <div className={`relative w-full overflow-hidden bg-mist ${compact ? "h-28" : "h-48"}`}>
         {hasCoverImage ? (
-          <Image src={website.imageUrl} alt="" fill className="object-cover" unoptimized />
+          <ExternalCoverImage src={website.imageUrl} />
         ) : (
           <div className="flex h-full items-center justify-center text-4xl font-semibold text-white" style={{ background: "radial-gradient(circle at 30% 20%,rgba(255,255,255,.65),transparent 6rem),linear-gradient(135deg,#dfe7dd,#c8d7dd,#d9bca7)" }}>
             {website.title.slice(0, 1)}

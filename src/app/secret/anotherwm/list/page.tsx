@@ -2,10 +2,10 @@
 
 import { EyeOff } from "lucide-react";
 import type { Route } from "next";
-import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { AppShell } from "@/components/app-shell";
+import { ExternalCoverImage } from "@/components/external-cover-image";
 import { JournalHeader } from "@/components/journal-list";
 import { api } from "@/lib/api";
 import type { WatchlistItem } from "@/types/watchlist";
@@ -49,7 +49,7 @@ export default function AnotherWMListPage() {
               </div>
               <div className="ao-card min-h-[116px] overflow-hidden">
                 <div className="relative h-[116px] w-full">
-                  {item.coverUrl ? <Image src={proxiedImageUrl(item.coverUrl)} alt="" fill className="object-cover" unoptimized /> : <div className="absolute inset-0 bg-[linear-gradient(135deg,#ece7de,#d6e2e5,#d5c1b2)]" />}
+                  <ExternalCoverImage src={item.coverUrl} fallbackClassName="absolute inset-0 bg-[linear-gradient(135deg,#ece7de,#d6e2e5,#d5c1b2)]" />
                   <div className="absolute inset-0 bg-gradient-to-r from-black/30 via-black/5 to-black/20" />
                   <div className="absolute bottom-3 left-4 right-4 text-white">
                     <p className="text-[9px] font-semibold uppercase tracking-[0.18em] opacity-80">{item.releaseDate || "Saved"}</p>
@@ -68,8 +68,4 @@ export default function AnotherWMListPage() {
       )}
     </AppShell>
   );
-}
-
-function proxiedImageUrl(value: string) {
-  return `/api/secret/watchlist/image?url=${encodeURIComponent(value)}`;
 }

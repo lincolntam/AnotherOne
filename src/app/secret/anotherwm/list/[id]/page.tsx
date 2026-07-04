@@ -1,11 +1,11 @@
 "use client";
 
 import { ArrowLeft, CalendarDays, ExternalLink, EyeOff, Tag, UserRound } from "lucide-react";
-import Image from "next/image";
 import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { AppShell } from "@/components/app-shell";
+import { ExternalCoverImage } from "@/components/external-cover-image";
 import { api } from "@/lib/api";
 import type { WatchlistItem } from "@/types/watchlist";
 import { findWatchlistItem, upsertWatchlistItem } from "@/utils/watchlist-storage";
@@ -109,11 +109,7 @@ export default function AnotherWMDetailPage() {
     <AppShell showHeader={false} showBottomNav={false}>
       <article className="min-h-[680px] overflow-hidden rounded-[34px] bg-white text-ink">
         <div className="relative h-[245px] w-full bg-paper">
-          {item.coverUrl ? (
-            <Image src={proxiedImageUrl(item.coverUrl)} alt="" fill className="object-cover" unoptimized />
-          ) : (
-            <div className="h-full w-full bg-[linear-gradient(135deg,#f5f1e9,#dfe8e9)]" />
-          )}
+          <ExternalCoverImage src={item.coverUrl} />
           <Link href="/secret/anotherwm/list" aria-label="Back" className="absolute left-4 top-5 inline-flex h-10 w-10 items-center justify-center rounded-full bg-white/85 text-ink shadow-sm backdrop-blur">
             <ArrowLeft size={18} />
           </Link>
@@ -172,10 +168,6 @@ async function refreshWatchlistItem(item: WatchlistItem) {
 
 function shouldRefresh(item: WatchlistItem) {
   return !item.coverUrl || !item.releaseDate || !item.genres.length || item.actresses.some((person) => /ranking|\u6392\u884c/iu.test(`${person.name} ${person.url || ""}`));
-}
-
-function proxiedImageUrl(value: string) {
-  return `/api/secret/watchlist/image?url=${encodeURIComponent(value)}`;
 }
 
 function InfoPill({ icon, label }: { icon: React.ReactNode; label: string }) {
