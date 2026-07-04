@@ -16,14 +16,15 @@ export const metadata: Metadata = {
   appleWebApp: {
     capable: true,
     title: "AnotherOne",
-    statusBarStyle: "default"
+    statusBarStyle: "black-translucent"
   }
 };
 
 export const viewport: Viewport = {
   width: "device-width",
   initialScale: 1,
-  themeColor: "#f8f7f4"
+  viewportFit: "cover",
+  themeColor: "#ffffff"
 };
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {

@@ -74,7 +74,7 @@ select {
       min-height: 100dvh;
       min-height: 100svh;
       @apply max-h-none max-w-none rounded-none shadow-none;
-      padding-top: max(env(safe-area-inset-top, 0px), 0.25rem);
+      padding-top: 0;
       padding-bottom: calc(env(safe-area-inset-bottom, 0px) + 6rem);
     }
 
