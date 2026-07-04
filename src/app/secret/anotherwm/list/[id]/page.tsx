@@ -32,9 +32,11 @@ export default function AnotherWMDetailPage() {
 
       setAllowed(true);
       const id = decodeURIComponent(params.id);
-      const saved = await api<WatchlistItem[]>("/api/secret/watchlist")
+      const local = findWatchlistItem(id);
+      const remote = await api<WatchlistItem[]>("/api/secret/watchlist")
         .then((items) => items.find((entry) => entry.id === id))
-        .catch(() => findWatchlistItem(id));
+        .catch(() => null);
+      const saved = pickRicherItem(remote || null, local || null);
 
       if (saved) {
         if (shouldRefresh(saved)) {
@@ -169,6 +171,20 @@ async function refreshWatchlistItem(item: WatchlistItem) {
 
 function shouldRefresh(item: WatchlistItem) {
   return !item.releaseDate || !item.genres.length || isDirtyWatchlistItem(item);
+}
+
+function pickRicherItem(primary: WatchlistItem | null, fallback: WatchlistItem | null) {
+  if (!primary) return fallback;
+  if (!fallback) return primary;
+  return metadataScore(fallback) > metadataScore(primary) ? fallback : primary;
+}
+
+function metadataScore(item: WatchlistItem) {
+  return Number(Boolean(item.title && item.title !== item.code)) * 2 +
+    Number(Boolean(item.releaseDate)) * 3 +
+    item.actresses.length * 2 +
+    item.genres.length * 2 +
+    Number(Boolean(item.coverUrl));
 }
 
 function InfoPill({ icon, label }: { icon: React.ReactNode; label: string }) {

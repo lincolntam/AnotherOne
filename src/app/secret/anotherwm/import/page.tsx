@@ -225,7 +225,7 @@ function cleanTitle(value: string, code: string) {
   const title = cleanText(value);
   if (!code) return title;
   const escaped = escapeRegExp(code);
-  return title.replace(new RegExp(`^${escaped}\\s*[-:：]?\\s*${escaped}\\s*[-:：]?\\s*`, "iu"), `${code} `);
+  return title.replace(new RegExp(`^${escaped}\\s*[-:\\uFF1A]?\\s*${escaped}\\s*[-:\\uFF1A]?\\s*`, "iu"), `${code} `);
 }
 
 function escapeRegExp(value: string) {

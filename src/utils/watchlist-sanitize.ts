@@ -3,7 +3,7 @@ import type { WatchlistGenre, WatchlistItem, WatchlistPerson } from "@/types/wat
 type WatchlistLink = WatchlistPerson | WatchlistGenre;
 
 const junkPattern =
-  /(?:ranking|排行|login|sign|vip|missav|search|搜尋|english|日本語|한국어|繁體中文|简体中文|簡體中文|中文|malayu|deutsch|français|tiếng việt|bahasa indonesia|filipino|português|選單|女優一覧|女優一覽|最近更新|新作上市|無碼流出|今日熱門|本週熱門|本月熱門|本周热门|官方|telegram|vpn|免費漫畫|亞洲|素人|無碼影片|觀看日本av)/iu;
+  /(?:ranking|login|sign|vip|missav|search|english|malayu|deutsch|francais|fran.?ais|tieng viet|bahasa indonesia|filipino|portugues|telegram|vpn|official|menu)/iu;
 
 export function normalizeWatchlistItem(item: WatchlistItem): WatchlistItem {
   return {
@@ -38,14 +38,7 @@ export function cleanReleaseDate(value: string) {
 }
 
 export function isDirtyWatchlistItem(item: WatchlistItem) {
-  return (
-    !item.coverUrl ||
-    !cleanReleaseDate(item.releaseDate) ||
-    hasJunkLinks(item.actresses) ||
-    hasJunkLinks(item.genres) ||
-    item.actresses.length > 10 ||
-    item.genres.length > 24
-  );
+  return hasJunkLinks(item.actresses) || hasJunkLinks(item.genres) || item.actresses.length > 10 || item.genres.length > 24;
 }
 
 export function cleanText(value: string) {
