@@ -56,7 +56,7 @@ export async function POST(request: Request) {
         savedAt: new Date().toISOString()
       };
 
-      return NextResponse.json({ data: item });
+      return NextResponse.json({ data: await enrichMissingMetadata(item, parsed.href) });
     } catch {
       return NextResponse.json({ data: enrichFallbackCover(fallback) });
     }
@@ -105,6 +105,73 @@ function enrichFallbackCover(item: WatchlistItem): WatchlistItem {
 
 function fallbackCoverUrl(code: string) {
   return code ? `https://fourhoi.com/${code.toLowerCase()}/cover-n.jpg` : "";
+}
+
+async function enrichMissingMetadata(item: WatchlistItem, currentUrl: string): Promise<WatchlistItem> {
+  if (hasCoreMetadata(item) || !item.code) return item;
+
+  for (const url of metadataCandidateUrls(item.code, currentUrl)) {
+    const parsed = parseAllowedUrl(url);
+    if (!parsed) continue;
+
+    const extra = await fetchMetadataCandidate(parsed, item).catch(() => null);
+    if (!extra) continue;
+
+    const merged: WatchlistItem = {
+      ...item,
+      site: item.site === "unknown" ? extra.site : item.site,
+      title: item.title === item.code && extra.title ? extra.title : item.title,
+      actresses: item.actresses.length ? item.actresses : extra.actresses,
+      genres: item.genres.length ? item.genres : extra.genres,
+      releaseDate: item.releaseDate || extra.releaseDate,
+      previewUrl: item.previewUrl || extra.previewUrl
+    };
+
+    if (hasCoreMetadata(merged)) return merged;
+  }
+
+  return item;
+}
+
+function hasCoreMetadata(item: WatchlistItem) {
+  return Boolean(item.releaseDate && item.genres.length && !hasRankingActress(item));
+}
+
+function hasRankingActress(item: WatchlistItem) {
+  return item.actresses.some((person) => /ranking|\u6392\u884c/iu.test(`${person.name} ${person.url || ""}`));
+}
+
+function metadataCandidateUrls(code: string, currentUrl: string) {
+  const slug = code.toLowerCase();
+  return [`https://missav.live/${slug}`, `https://missav.ws/${slug}`].filter((url) => url !== currentUrl);
+}
+
+async function fetchMetadataCandidate(parsed: URL, fallback: WatchlistItem): Promise<WatchlistItem | null> {
+  const response = await fetch(parsed.href, {
+    headers: {
+      Accept: "text/html,application/xhtml+xml",
+      "User-Agent": "AnotherOne/1.0 (+https://anotherone.local)"
+    },
+    redirect: "follow"
+  });
+
+  if (!response.ok) return null;
+
+  const html = await response.text();
+  const title = cleanText(extractMeta(html, "og:title") || extractTag(html, "h1") || extractTitle(html) || fallback.title);
+  const code = extractCode(`${parsed.pathname} ${title}`) || fallback.code;
+
+  return {
+    ...fallback,
+    id: createId(code, fallback.sourceUrl),
+    site: getSite(parsed.hostname),
+    title,
+    code,
+    previewUrl: absolutize(extractMeta(html, "og:video") || extractMeta(html, "og:video:url") || extractMeta(html, "og:video:secure_url") || "", parsed),
+    actresses: uniqueByName(extractLabelLinks<WatchlistPerson>(html, actressLabel, parsed)).filter((person) => !/ranking|\u6392\u884c/iu.test(`${person.name} ${person.url || ""}`)),
+    genres: uniqueByName(extractLabelLinks<WatchlistGenre>(html, genreLabel, parsed)),
+    releaseDate: extractReleaseDate(html)
+  };
 }
 
 function createId(code: string, sourceUrl: string) {
@@ -208,7 +275,7 @@ function removeLabel(value: string, label: string) {
 function extractDelimitedNames(value: string) {
   return cleanText(value)
     .replace(/^\s*[:\uFF1A]\s*/u, "")
-    .split(/[,，、]/u)
+    .split(/[,\uFF0C\u3001]/u)
     .map((name) => cleanText(name))
     .filter(Boolean);
 }
