@@ -1,6 +1,8 @@
 (function () {
   var APP = "https://anotherone-2hs.pages.dev/secret/anotherwm/import";
   var labels = ["Title", "標題", "Actress", "Actresses", "女優", "Genre", "Genres", "類型", "Release date", "Release Date", "發行日期", "Code", "番號", "系列", "發行商", "標籤", "導演"];
+  var currentScript = document.currentScript;
+  var debugMode = Boolean(currentScript && /[?&]debug=1(?:&|$)/.test(currentScript.src || ""));
 
   function text(value) {
     return String(value || "").replace(/\s+/g, " ").trim();
@@ -144,5 +146,12 @@
   };
 
   console.log("AnotherWM import payload", payload);
+  if (debugMode) {
+    var output = JSON.stringify(payload, null, 2);
+    navigator.clipboard?.writeText(output).catch(function () {});
+    alert("AnotherWM payload copied to clipboard:\n\n" + output.slice(0, 1600));
+    return;
+  }
+
   location.href = APP + "#b64=" + b64(JSON.stringify(payload));
 })();
