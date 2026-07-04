@@ -22,6 +22,8 @@ type ImportPayload = {
   genres?: WatchlistGenre[];
   releaseDate?: string;
   code?: string;
+  rawText?: string;
+  selectedText?: string;
 };
 
 const pendingImportKey = "anotherwm-pending-import";
@@ -100,9 +102,10 @@ function createWatchlistItem(payload: ImportPayload): WatchlistItem {
   const sourceUrl = normalizeUrl(payload.url || "");
   if (!sourceUrl) throw new Error("Missing source URL");
 
+  const rawText = cleanText(payload.selectedText || payload.rawText || payload.description || "");
   const site = getSite(payload.site || sourceUrl);
-  const code = normalizeCode(payload.code || extractCode(sourceUrl) || extractCode(payload.title || ""));
-  const title = cleanText(payload.title || code || sourceUrl);
+  const code = normalizeCode(payload.code || readLabel(rawText, "番號") || extractCode(sourceUrl) || extractCode(payload.title || "") || extractCode(rawText));
+  const title = cleanText(payload.title || readLabel(rawText, "標題") || code || sourceUrl);
 
   return {
     id: createId(code, sourceUrl),
@@ -112,9 +115,9 @@ function createWatchlistItem(payload: ImportPayload): WatchlistItem {
     code,
     coverUrl: normalizeUrl(payload.coverUrl || payload.cover || payload.imageUrl || ""),
     previewUrl: normalizeUrl(payload.previewUrl || ""),
-    actresses: normalizeLinks(payload.actresses),
-    genres: normalizeLinks(payload.genres),
-    releaseDate: cleanText(payload.releaseDate || ""),
+    actresses: normalizeLinks(payload.actresses?.length ? payload.actresses : textToLinks(readLabel(rawText, "女優"))),
+    genres: normalizeLinks(payload.genres?.length ? payload.genres : textToLinks(readLabel(rawText, "類型"))),
+    releaseDate: cleanText(payload.releaseDate || readLabel(rawText, "發行日期")),
     savedAt: new Date().toISOString()
   };
 }
@@ -163,4 +166,21 @@ function normalizeUrl(value: string) {
 
 function cleanText(value: string) {
   return value.replace(/\s+/gu, " ").trim();
+}
+
+function readLabel(value: string, label: string) {
+  if (!value) return "";
+  const escaped = label.replace(/[.*+?^${}()|[\]\\]/gu, "\\$&");
+  const stopLabels = ["發行日期", "番號", "標題", "女優", "類型", "系列", "發行商", "標籤", "導演"].filter((item) => item !== label).map((item) => item.replace(/[.*+?^${}()|[\]\\]/gu, "\\$&")).join("|");
+  const pattern = new RegExp(`${escaped}\\s*[:：]\\s*([\\s\\S]*?)(?=\\s+(?:${stopLabels})\\s*[:：]|$)`, "u");
+  return cleanText(pattern.exec(value)?.[1] || "");
+}
+
+function textToLinks(value: string): WatchlistPerson[] {
+  if (!value) return [];
+  return value
+    .split(/[,，、/]/u)
+    .map((name) => cleanText(name))
+    .filter(Boolean)
+    .map((name) => ({ name }));
 }
