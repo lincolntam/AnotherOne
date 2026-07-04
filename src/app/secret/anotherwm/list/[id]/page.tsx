@@ -242,14 +242,20 @@ export default function AnotherWMDetailPage() {
   function saveItemEdits(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
     if (!item) return;
-    const next = { ...item, code: codeInput.trim().toUpperCase(), coverUrl: imageUrl.trim() };
+    const nextCode = normalizeEditedCode(codeInput);
+    const nextId = nextCode ? nextCode.toLowerCase() : item.id;
+    const next = { ...item, id: nextId, code: nextCode, coverUrl: imageUrl.trim() };
     setItem(next);
-    setItems((current) => current.map((entry) => (entry.id === next.id ? next : entry)));
+    setItems((current) => current.map((entry) => (entry.id === item.id ? next : entry)));
     setEditorOpen(false);
     api<WatchlistItem>("/api/secret/watchlist", {
       method: "POST",
       body: JSON.stringify(next)
-    }).catch(() => undefined);
+    })
+      .then(() => {
+        if (next.id !== item.id) router.replace(`/secret/anotherwm/list/${encodeURIComponent(next.id)}` as Route);
+      })
+      .catch(() => undefined);
   }
 }
 
@@ -273,6 +279,10 @@ async function refreshWatchlistItem(item: WatchlistItem) {
 
 function shouldRefresh(item: WatchlistItem) {
   return !item.releaseDate || !item.genres.length || isDirtyWatchlistItem(item);
+}
+
+function normalizeEditedCode(value: string) {
+  return value.trim().replace(/[_\s]+/gu, "-").toUpperCase();
 }
 
 function WatchlistSidePane({ activeId, items }: { activeId: string; items: WatchlistItem[] }) {

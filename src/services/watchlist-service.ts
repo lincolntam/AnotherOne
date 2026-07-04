@@ -46,7 +46,8 @@ export async function saveWatchlistItem(user: AppUser, item: WatchlistItem) {
       `insert into anotherwm_watchlist_items
         (id, user_id, source_url, site, title, code, cover_url, preview_url, actresses_json, genres_json, release_date, status, saved_at, updated_at)
        values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-       on conflict(user_id, source_url) do update set
+      on conflict(user_id, source_url) do update set
+        id = excluded.id,
         site = excluded.site,
         title = excluded.title,
         code = excluded.code,
