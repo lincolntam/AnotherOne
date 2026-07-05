@@ -28,7 +28,7 @@ export function LtravelLogCharging() {
   }, [start, end]);
 
   return (
-    <LtravelLogToolShell title="Charging" subtitle="Zone 1">
+    <LtravelLogToolShell title="Charging" subtitle="Zone 1" activeId="charging">
       <div className="space-y-5">
         <ToolCard className="space-y-4">
           <div className="flex items-start gap-4">

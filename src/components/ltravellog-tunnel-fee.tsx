@@ -16,7 +16,7 @@ export function LtravelLogTunnelFee() {
   const rows = useMemo(() => getCurrentTunnelFees(Number.isNaN(selectedDate.getTime()) ? new Date() : selectedDate), [selectedDate]);
 
   return (
-    <LtravelLogToolShell title="Tunnel Fee" subtitle="Private car">
+    <LtravelLogToolShell title="Tunnel Fee" subtitle="Private car" activeId="tunnel-fee">
       <div className="space-y-5">
         <ToolCard className="space-y-4">
           <div className="flex items-start gap-4">
