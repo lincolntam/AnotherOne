@@ -92,13 +92,19 @@ function collectTags(items: WatchlistItem[], type: TagType) {
   items.forEach((item) => {
     const source = type === "actress" ? item.actresses : item.genres;
     source.forEach((tag) => {
-      const key = `${tag.name.toLowerCase()}|${tag.url || ""}`;
+      const name = normalizeTagName(tag.name);
+      if (!name) return;
+      const key = name.toLowerCase();
       const current = map.get(key);
-      map.set(key, { name: tag.name, url: tag.url, count: (current?.count || 0) + 1 });
+      map.set(key, { name, url: current?.url || tag.url, count: (current?.count || 0) + 1 });
     });
   });
 
   return [...map.values()].sort((a, b) => b.count - a.count || a.name.localeCompare(b.name));
+}
+
+function normalizeTagName(value: string) {
+  return value.replace(/\s+/gu, " ").trim();
 }
 
 function createListHref(type: TagType, tag: TagEntry) {

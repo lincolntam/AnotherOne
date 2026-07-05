@@ -1,15 +1,13 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
-import { ArrowUpDown, Car, CornerDownLeft, LocateFixed, MapPin, Route, Zap } from "lucide-react";
+import { ArrowUpDown, CalendarDays, Car, CornerDownLeft, LocateFixed, MapPin, Route, Zap } from "lucide-react";
 import { LtravelLogFrame } from "@/components/ltravellog-frame";
 import {
   calculateTripEstimate,
   calculateTripEstimateWithToll,
   chargingPlans,
   detectRouteTunnels,
-  getTunnelFee,
-  tunnelOptions,
   type LatLngPoint,
   type RouteTunnelDetail,
   type TripEstimate
@@ -58,10 +56,16 @@ type DirectionsResult = {
 declare global {
   interface Window {
     google?: GoogleMaps;
+    gm_authFailure?: () => void;
   }
 }
 
 const sheetInputClass = "w-full rounded-2xl border border-white/20 bg-white/10 px-4 py-3 text-base font-semibold text-white outline-none placeholder:text-white/35 focus:border-white/45 disabled:opacity-50";
+
+function toLocalInputValue(date: Date) {
+  const pad = (value: number) => String(value).padStart(2, "0");
+  return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}T${pad(date.getHours())}:${pad(date.getMinutes())}`;
+}
 
 export function LtravelLogTripPlanner() {
   const mapRef = useRef<HTMLDivElement | null>(null);
@@ -78,16 +82,16 @@ export function LtravelLogTripPlanner() {
   const [returnTrip, setReturnTrip] = useState(false);
   const [distance, setDistance] = useState(28);
   const [duration, setDuration] = useState(42);
+  const [startTime, setStartTime] = useState(() => toLocalInputValue(new Date()));
   const [planId, setPlanId] = useState<string>(chargingPlans[0].id);
-  const [tunnelId, setTunnelId] = useState("auto");
   const [avoidTolls, setAvoidTolls] = useState(false);
   const [routeDetails, setRouteDetails] = useState<RouteTunnelDetail[]>([]);
   const [isPlanning, setIsPlanning] = useState(false);
   const [routeMessage, setRouteMessage] = useState("Ready");
 
   const manualEstimate = useMemo(
-    () => calculateTripEstimate(distance, duration, planId, avoidTolls ? "none" : tunnelId === "auto" ? "none" : tunnelId),
-    [avoidTolls, distance, duration, planId, tunnelId]
+    () => calculateTripEstimate(distance, duration, planId, "none"),
+    [distance, duration, planId]
   );
 
   const routeEstimate = useMemo(() => {
@@ -110,6 +114,11 @@ export function LtravelLogTripPlanner() {
           return;
         }
 
+        window.gm_authFailure = () => {
+          setMapError("Google Maps API key is not allowed for this domain.");
+          setMapsReady(false);
+        };
+
         if (window.google?.maps) {
           if (!cancelled) setupGoogleMap();
           return;
@@ -123,7 +132,7 @@ export function LtravelLogTripPlanner() {
 
         const script = document.createElement("script");
         script.id = "google-maps-script";
-        script.src = `https://maps.googleapis.com/maps/api/js?key=${encodeURIComponent(key)}&libraries=places`;
+        script.src = `https://maps.googleapis.com/maps/api/js?key=${encodeURIComponent(key)}&libraries=places&language=zh-HK&region=HK&v=weekly&loading=async&auth_referrer_policy=origin`;
         script.async = true;
         script.onload = () => !cancelled && setupGoogleMap();
         script.onerror = () => !cancelled && setMapError("Google Maps script failed to load.");
@@ -176,9 +185,8 @@ export function LtravelLogTripPlanner() {
 
   async function planRoute() {
     if (!mapsReady || !window.google?.maps || !directionsServiceRef.current || !origin || !destination) {
-      setRouteMessage(mapsReady ? "Enter origin and destination." : "Manual estimate mode.");
-      const selectedToll = avoidTolls || tunnelId === "auto" ? { fee: 0, rule: "Manual estimate" } : getTunnelFee(tunnelId);
-      setRouteDetails(selectedToll.fee ? [{ id: tunnelId, name: tunnelOptions.find((item) => item.id === tunnelId)?.name ?? "Tunnel", ...selectedToll }] : []);
+      setRouteMessage(mapsReady ? "請輸入出發點和目的地。" : "Map 未能載入，請檢查 Google Maps API key。");
+      setRouteDetails([]);
       return;
     }
 
@@ -202,7 +210,7 @@ export function LtravelLogTripPlanner() {
       (result: DirectionsResult | null, status: string) => {
         setIsPlanning(false);
         if (status !== "OK" || !result?.routes?.[0]) {
-          setRouteMessage(`Route failed: ${status}`);
+          setRouteMessage(status === "NOT_FOUND" || status === "ZERO_RESULTS" ? "找不到路線，請輸入完整地址。" : `Route failed: ${status}`);
           return;
         }
 
@@ -212,14 +220,12 @@ export function LtravelLogTripPlanner() {
         const nextDistance = legs.reduce((sum, leg) => sum + (leg.distance?.value ?? 0), 0) / 1000;
         const nextDuration = Math.round(legs.reduce((sum, leg) => sum + (leg.duration?.value ?? 0), 0) / 60);
         const path: LatLngPoint[] = (route.overview_path ?? []).map((point) => ({ lat: point.lat(), lng: point.lng() }));
-        const autoDetected = avoidTolls || tunnelId !== "auto" ? [] : detectRouteTunnels(path);
-        const manualToll = !avoidTolls && tunnelId !== "auto" && tunnelId !== "none" ? getTunnelFee(tunnelId) : null;
-        const manualDetail = manualToll ? [{ id: tunnelId, name: tunnelOptions.find((item) => item.id === tunnelId)?.name ?? "Tunnel", ...manualToll }] : [];
+        const autoDetected = avoidTolls ? [] : detectRouteTunnels(path);
 
         setDistance(Number(nextDistance.toFixed(1)));
         setDuration(nextDuration);
-        setRouteDetails(tunnelId === "auto" ? autoDetected : manualDetail);
-        setRouteMessage(autoDetected.length || manualDetail.length ? "Route planned with tunnel fee." : "Route planned.");
+        setRouteDetails(autoDetected);
+        setRouteMessage(autoDetected.length ? "Route planned with tunnel fee." : "Route planned.");
       }
     );
   }
@@ -249,7 +255,7 @@ export function LtravelLogTripPlanner() {
       mobileTitle="LTravelLog"
       mobileSubtitle="Trip Planner"
       right={
-        <section className="relative flex min-h-[100svh] flex-col justify-end overflow-hidden bg-[#dfe8e6] px-5 pb-6 pt-24 lg:px-0 lg:pb-0 lg:pt-0">
+        <section className="relative flex min-h-[100svh] flex-col justify-end overflow-hidden bg-[#dfe8e6] px-4 pb-4 pt-0 lg:px-0 lg:pb-0 lg:pt-0">
           <div ref={mapRef} className="absolute inset-0" />
           {!mapsReady ? <FallbackMap /> : null}
           <div className="pointer-events-none absolute left-8 top-8 hidden rounded-full bg-white/45 px-4 py-2 text-xs font-black text-white shadow-sm backdrop-blur lg:block">
@@ -262,8 +268,8 @@ export function LtravelLogTripPlanner() {
             returnTrip={returnTrip}
             distance={distance}
             duration={duration}
+            startTime={startTime}
             planId={planId}
-            tunnelId={tunnelId}
             avoidTolls={avoidTolls}
             estimate={routeEstimate}
             routeDetails={routeDetails}
@@ -277,10 +283,8 @@ export function LtravelLogTripPlanner() {
             onDestinationChange={setDestination}
             onWaypointsChange={setWaypoints}
             onReturnTripChange={setReturnTrip}
-            onDistanceChange={setDistance}
-            onDurationChange={setDuration}
+            onStartTimeChange={setStartTime}
             onPlanChange={setPlanId}
-            onTunnelChange={setTunnelId}
             onAvoidTollsChange={setAvoidTolls}
             onUseCurrentLocation={useCurrentLocation}
             onPlan={planRoute}
@@ -288,6 +292,7 @@ export function LtravelLogTripPlanner() {
           />
         </section>
       }
+      hideMobileHeader
     />
   );
 }
@@ -314,8 +319,8 @@ function PlannerSheet({
   returnTrip,
   distance,
   duration,
+  startTime,
   planId,
-  tunnelId,
   avoidTolls,
   estimate,
   routeDetails,
@@ -329,10 +334,8 @@ function PlannerSheet({
   onDestinationChange,
   onWaypointsChange,
   onReturnTripChange,
-  onDistanceChange,
-  onDurationChange,
+  onStartTimeChange,
   onPlanChange,
-  onTunnelChange,
   onAvoidTollsChange,
   onUseCurrentLocation,
   onPlan,
@@ -344,8 +347,8 @@ function PlannerSheet({
   returnTrip: boolean;
   distance: number;
   duration: number;
+  startTime: string;
   planId: string;
-  tunnelId: string;
   avoidTolls: boolean;
   estimate: TripEstimate;
   routeDetails: RouteTunnelDetail[];
@@ -359,103 +362,67 @@ function PlannerSheet({
   onDestinationChange: (value: string) => void;
   onWaypointsChange: (value: string[]) => void;
   onReturnTripChange: (value: boolean) => void;
-  onDistanceChange: (value: number) => void;
-  onDurationChange: (value: number) => void;
+  onStartTimeChange: (value: string) => void;
   onPlanChange: (value: string) => void;
-  onTunnelChange: (value: string) => void;
   onAvoidTollsChange: (value: boolean) => void;
   onUseCurrentLocation: (target: "origin" | "destination") => void;
   onPlan: () => void;
   className?: string;
 }) {
   return (
-    <form className={`rounded-[34px] bg-[#6f7679]/88 p-5 text-white shadow-[0_22px_70px_rgba(34,34,34,0.28)] backdrop-blur-xl ${className ?? ""}`} onSubmit={(event) => { event.preventDefault(); onPlan(); }}>
+    <form className={`rounded-[24px] bg-[#6f7679]/88 p-5 text-white shadow-[0_22px_70px_rgba(34,34,34,0.28)] backdrop-blur-xl sm:rounded-[34px] ${className ?? ""}`} onSubmit={(event) => { event.preventDefault(); onPlan(); }}>
       <div className="mx-auto mb-5 h-1.5 w-14 rounded-full bg-white/20" />
       <div className="space-y-3">
-        <SheetField label="Origin" icon={<button type="button" aria-label="Use current location for origin" onClick={() => onUseCurrentLocation("origin")}><LocateFixed size={24} /></button>}>
-          <input ref={originInputRef} className={sheetInputClass} value={origin} placeholder="Enter address or use current location" onChange={(event) => onOriginChange(event.target.value)} />
+        <SheetField label="出發點" icon={<button type="button" aria-label="Use current location for origin" onClick={() => onUseCurrentLocation("origin")}><LocateFixed size={24} /></button>}>
+          <input ref={originInputRef} className={sheetInputClass} value={origin} placeholder="輸入地址或使用目前位置" onChange={(event) => onOriginChange(event.target.value)} />
         </SheetField>
-        <SheetField label="Destination" icon={<button type="button" aria-label="Use current location for destination" onClick={() => onUseCurrentLocation("destination")}><LocateFixed size={24} /></button>}>
-          <input ref={destinationInputRef} className={sheetInputClass} value={destination} placeholder="Where do you want to go?" onChange={(event) => onDestinationChange(event.target.value)} />
+        <SheetField label="目的地" icon={<button type="button" aria-label="Use current location for destination" onClick={() => onUseCurrentLocation("destination")}><LocateFixed size={24} /></button>}>
+          <input ref={destinationInputRef} className={sheetInputClass} value={destination} placeholder="你想去邊？" onChange={(event) => onDestinationChange(event.target.value)} />
         </SheetField>
         {waypoints.map((waypoint, index) => (
-          <SheetField key={index} label={`Waypoint ${index + 1}`}>
+          <SheetField key={index} label={`途經點 ${index + 1}`}>
             <input
               className={sheetInputClass}
               value={waypoint}
-              placeholder="Stopover address"
+              placeholder="輸入途經點"
               onChange={(event) => onWaypointsChange(waypoints.map((item, itemIndex) => itemIndex === index ? event.target.value : item))}
             />
           </SheetField>
         ))}
         <button className="flex w-full items-center justify-center gap-3 rounded-2xl border border-white/20 bg-white/10 px-4 py-3 text-base font-black text-white transition active:scale-[0.99]" type="button" onClick={() => onWaypointsChange([...waypoints, ""])}>
-          <MapPin size={20} /> Add waypoint
+          <MapPin size={20} /> 新增途經點
         </button>
         <button className="flex w-full items-center justify-center gap-3 rounded-2xl border border-white/20 bg-white/10 px-4 py-3 text-base font-black text-white transition active:scale-[0.99]" type="button" onClick={() => { onOriginChange(destination); onDestinationChange(origin); }}>
-          <ArrowUpDown size={20} /> Swap origin and destination
+          <ArrowUpDown size={20} /> 將起點和目的地對調
         </button>
         <button className={`flex w-full items-center justify-center gap-3 rounded-2xl border border-white/20 px-4 py-3 text-base font-black text-white transition active:scale-[0.99] ${returnTrip ? "bg-white/20" : "bg-white/10"}`} type="button" onClick={() => onReturnTripChange(!returnTrip)}>
-          <CornerDownLeft size={20} /> {returnTrip ? "Return trip on" : "Add return trip"}
+          <CornerDownLeft size={20} /> {returnTrip ? "已加入回程" : "加入回程"}
         </button>
         <div className="grid grid-cols-2 gap-3">
-          <SheetField label="Distance km">
-            <input className={sheetInputClass} type="number" min="0" step="0.1" value={distance} onChange={(event) => onDistanceChange(Number(event.target.value) || 0)} />
+          <SheetField label="出發時間" icon={<CalendarDays size={19} />}>
+            <input className={sheetInputClass} type="datetime-local" value={startTime} onChange={(event) => onStartTimeChange(event.target.value)} />
           </SheetField>
-          <SheetField label="Time min">
-            <input className={sheetInputClass} type="number" min="0" step="1" value={duration} onChange={(event) => onDurationChange(Number(event.target.value) || 0)} />
+          <SheetField label="能源方案">
+            <select className={sheetInputClass} value={planId} onChange={(event) => onPlanChange(event.target.value)}>
+              {chargingPlans.map((plan) => <option key={plan.id} value={plan.id}>{plan.label}</option>)}
+            </select>
           </SheetField>
         </div>
-        <SheetField label="Energy plan">
-          <select className={sheetInputClass} value={planId} onChange={(event) => onPlanChange(event.target.value)}>
-            {chargingPlans.map((plan) => <option key={plan.id} value={plan.id}>{plan.label}</option>)}
-          </select>
-        </SheetField>
-        <SheetField label="Tunnel">
-          <select className={sheetInputClass} value={tunnelId} disabled={avoidTolls} onChange={(event) => onTunnelChange(event.target.value)}>
-            {tunnelOptions.map((tunnel) => <option key={tunnel.id} value={tunnel.id}>{tunnel.name}</option>)}
-          </select>
-        </SheetField>
-        <TunnelPicker activeId={tunnelId} disabled={avoidTolls} onChange={onTunnelChange} />
         <label className="flex items-center justify-between rounded-2xl border border-white/20 bg-white/10 px-4 py-3 text-sm font-bold text-white/85">
-          Avoid toll roads
+          避開收費路段
           <input className="h-7 w-7 accent-white" type="checkbox" checked={avoidTolls} onChange={(event) => onAvoidTollsChange(event.target.checked)} />
         </label>
-        <div className="grid grid-cols-3 gap-2 text-center text-[10px] font-black uppercase tracking-[0.08em] text-white/70">
-          <Metric label="Tunnel" value={`HK$${estimate.tunnelFee}`} />
-          <Metric label="EV" value={`HK$${estimate.energyCost.toFixed(1)}`} />
-          <Metric label="Save" value={`HK$${estimate.fuelSavings.toFixed(1)}`} />
-        </div>
         <div className="rounded-2xl border border-white/15 bg-white/10 px-4 py-3 text-xs font-bold leading-5 text-white/70">
           <p>{mapsReady ? routeMessage : mapError || "Loading Google Maps..."}</p>
           {routeDetails.length ? <p className="mt-1">{routeDetails.map((detail) => `${detail.name} HK$${detail.fee}`).join(" + ")}</p> : null}
         </div>
-        <RouteSummary estimate={estimate} routeDetails={routeDetails} distance={distance} duration={duration} />
+        {routeMessage.startsWith("Route planned") || routeDetails.length ? <RouteSummary estimate={estimate} routeDetails={routeDetails} distance={distance} duration={duration} /> : null}
         <button className="flex w-full items-center justify-center gap-2 rounded-2xl bg-[#d57783] px-5 py-4 text-lg font-black text-white shadow-[0_16px_32px_rgba(148,67,78,0.28)] transition active:scale-[0.99]" type="submit" disabled={isPlanning}>
-          <Route size={20} /> {isPlanning ? "Planning..." : `Start planning HK$${estimate.total.toFixed(1)}`}
+          <Route size={20} /> {isPlanning ? "規劃中..." : "開始規劃"}
         </button>
       </div>
-      <p className="mt-5 text-center text-xs font-bold text-white/35">v0.55.14</p>
+      <p className="mt-5 text-center text-xs font-bold text-white/35">v0.55.21</p>
     </form>
-  );
-}
-
-function TunnelPicker({ activeId, disabled, onChange }: { activeId: string; disabled: boolean; onChange: (value: string) => void }) {
-  return (
-    <div className="grid grid-cols-3 gap-2">
-      {tunnelOptions.slice(0, 8).map((tunnel) => (
-        <button
-          key={tunnel.id}
-          type="button"
-          disabled={disabled}
-          onClick={() => onChange(tunnel.id)}
-          className={`min-h-11 rounded-2xl border px-2 py-2 text-[10px] font-black leading-tight transition active:scale-[0.98] disabled:opacity-35 ${
-            activeId === tunnel.id ? "border-white/45 bg-white/[0.24] text-white" : "border-white/15 bg-white/[0.08] text-white/70"
-          }`}
-        >
-          {shortTunnelName(tunnel.name)}
-        </button>
-      ))}
-    </div>
   );
 }
 
@@ -494,17 +461,6 @@ function RouteMetric({ icon, label, value }: { icon: React.ReactNode; label: str
   );
 }
 
-function shortTunnelName(name: string) {
-  return name
-    .replace("Harbour Crossing", "HC")
-    .replace("Cross-Harbour", "CHT")
-    .replace("Tunnel", "")
-    .replace("Tunnels", "")
-    .replace("Auto detect", "Auto")
-    .replace("No tunnel", "None")
-    .trim();
-}
-
 function SheetField({ label, icon, children }: { label: string; icon?: React.ReactNode; children: React.ReactNode }) {
   return (
     <label className="block text-sm font-bold text-white/70">
@@ -514,14 +470,5 @@ function SheetField({ label, icon, children }: { label: string; icon?: React.Rea
         {icon ? <span className="absolute right-2 top-1/2 inline-flex h-11 w-11 -translate-y-1/2 items-center justify-center rounded-full bg-white/15 text-white/70">{icon}</span> : null}
       </div>
     </label>
-  );
-}
-
-function Metric({ label, value }: { label: string; value: string }) {
-  return (
-    <div className="rounded-2xl border border-white/15 bg-white/10 px-2 py-2">
-      <p>{label}</p>
-      <p className="mt-1 text-sm tracking-normal text-white">{value}</p>
-    </div>
   );
 }

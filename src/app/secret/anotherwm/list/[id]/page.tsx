@@ -116,7 +116,7 @@ export default function AnotherWMDetailPage() {
 
   return (
     <AppShell showHeader={false} showBottomNav={false}>
-      <article className="min-h-[680px] overflow-hidden rounded-[34px] bg-white text-ink lg:grid lg:min-h-[100dvh] lg:grid-cols-[minmax(360px,0.38fr)_minmax(0,0.62fr)] lg:rounded-none">
+      <article className="min-h-[680px] overflow-hidden rounded-[34px] bg-white text-ink lg:grid lg:min-h-[100dvh] lg:grid-cols-[minmax(420px,min(780px,48vw))_minmax(0,1fr)] lg:rounded-none">
         <WatchlistSidePane activeId={item.id} items={items} />
 
         <section className="bg-white lg:min-h-[100dvh] lg:overflow-y-auto lg:px-12 lg:py-7 xl:px-20">

@@ -24,11 +24,11 @@ export function normalizeWatchlistItem(item: WatchlistItem): WatchlistItem {
 }
 
 export function sanitizePeople(items?: WatchlistPerson[]) {
-  return sanitizeLinks(items, { requiredPath: "/actresses/", maxItems: 10 });
+  return sanitizeLinks(items, { requiredPaths: ["/actresses/"], maxItems: 10 });
 }
 
 export function sanitizeGenres(items?: WatchlistGenre[]) {
-  return sanitizeLinks(items, { requiredPath: "/genres/", maxItems: 24 });
+  return sanitizeLinks(items, { requiredPaths: ["/genres/", "/chinese-subtitle"], maxItems: 24 });
 }
 
 export function cleanReleaseDate(value: string) {
@@ -54,7 +54,7 @@ function normalizeStatus(value: string | undefined) {
   return value === "Watched" || value === "Again" ? value : "Pending";
 }
 
-function sanitizeLinks<T extends WatchlistLink>(items: T[] | undefined, options: { requiredPath: string; maxItems: number }) {
+function sanitizeLinks<T extends WatchlistLink>(items: T[] | undefined, options: { requiredPaths: string[]; maxItems: number }) {
   if (!Array.isArray(items)) return [];
 
   const seen = new Set<string>();
@@ -65,9 +65,9 @@ function sanitizeLinks<T extends WatchlistLink>(items: T[] | undefined, options:
     }))
     .filter((item) => {
       if (!item.name || item.name.length > 42 || junkPattern.test(item.name)) return false;
-      if (item.url && !urlContainsPath(item.url, options.requiredPath)) return false;
+      if (item.url && !options.requiredPaths.some((path) => urlContainsPath(item.url || "", path))) return false;
 
-      const key = `${item.name.toLowerCase()}|${item.url || ""}`;
+      const key = item.name.toLowerCase();
       if (seen.has(key)) return false;
       seen.add(key);
       return true;
