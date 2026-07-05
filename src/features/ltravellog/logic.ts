@@ -7,20 +7,21 @@ export const chargingPlans = [
 ] as const;
 
 export const fixedTunnels = [
-  { id: "aberdeen", name: "香港仔隧道", fee: 8, rule: "Fixed toll" },
-  { id: "shing-mun", name: "城門隧道", fee: 8, rule: "Fixed toll" },
-  { id: "lion-rock", name: "獅子山隧道", fee: 8, rule: "Fixed toll" },
-  { id: "eagles-nest", name: "尖山 / 沙田嶺 / 大圍隧道", fee: 8, rule: "Fixed toll" },
-  { id: "tates-cairn", name: "大老山隧道", fee: 20, rule: "Fixed toll" },
-  { id: "discovery-bay", name: "愉景灣隧道連接路", fee: 250, rule: "One-way to Discovery Bay" }
+  { id: "aberdeen", name: "Aberdeen Tunnel", fee: 8, rule: "Fixed toll" },
+  { id: "shing-mun", name: "Shing Mun Tunnels", fee: 8, rule: "Fixed toll" },
+  { id: "lion-rock", name: "Lion Rock Tunnel", fee: 8, rule: "Fixed toll" },
+  { id: "eagles-nest", name: "Eagle's Nest / Sha Tin Heights / Tai Wai Tunnel", fee: 8, rule: "Fixed toll" },
+  { id: "tates-cairn", name: "Tate's Cairn Tunnel", fee: 20, rule: "Fixed toll" },
+  { id: "discovery-bay", name: "Discovery Bay Tunnel Link", fee: 250, rule: "One-way to Discovery Bay" }
 ] as const;
 
 export const tunnelOptions = [
+  { id: "auto", name: "Auto detect", kind: "auto", fee: 0 },
   { id: "none", name: "No tunnel", kind: "fixed", fee: 0 },
-  { id: "western", name: "西隧", kind: "harbour" },
-  { id: "cross-harbour", name: "紅隧", kind: "harbour" },
-  { id: "eastern", name: "東隧", kind: "harbour" },
-  { id: "tai-lam", name: "大欖隧道", kind: "tai-lam" },
+  { id: "western", name: "Western Harbour Crossing", kind: "harbour" },
+  { id: "cross-harbour", name: "Cross-Harbour Tunnel", kind: "harbour" },
+  { id: "eastern", name: "Eastern Harbour Crossing", kind: "harbour" },
+  { id: "tai-lam", name: "Tai Lam Tunnel", kind: "tai-lam" },
   ...fixedTunnels.map((tunnel) => ({ id: tunnel.id, name: tunnel.name, kind: "fixed", fee: tunnel.fee }))
 ] as const;
 
@@ -31,18 +32,19 @@ export const zoneOneChargingSlots = [
   { startDay: 6, startTime: "12:00", endDay: 0, endTime: "11:59", label: "Saturday 12:00 to Sunday 11:59" }
 ] as const;
 
-const hkGeneralHolidays2026 = new Set([
-  "2026-01-01", "2026-02-17", "2026-02-18", "2026-02-19", "2026-04-03",
-  "2026-04-04", "2026-04-06", "2026-04-07", "2026-05-01", "2026-05-25",
-  "2026-06-19", "2026-07-01", "2026-09-26", "2026-10-01", "2026-10-19",
-  "2026-12-25", "2026-12-26"
-]);
-
-const weekMs = 7 * 24 * 60 * 60 * 1000;
+export type LatLngPoint = {
+  lat: number;
+  lng: number;
+};
 
 export type TollResult = {
   fee: number;
   rule: string;
+};
+
+export type RouteTunnelDetail = TollResult & {
+  id: string;
+  name: string;
 };
 
 export type TripEstimate = {
@@ -56,40 +58,61 @@ export type TripEstimate = {
   tollRule: string;
 };
 
-export function calculateTripEstimate(distanceKm: number, durationMin: number, planId: string, tunnelId: string, at = new Date()): TripEstimate {
-  const plan = chargingPlans.find((item) => item.id === planId) ?? chargingPlans[0];
-  const toll = getTunnelFee(tunnelId, at);
-  const energyCost = distanceKm * plan.efficiency * plan.rate;
-  const total = energyCost + toll.fee;
-  const fuelCarCost = distanceKm * FUEL_CAR_COST_PER_KM + toll.fee;
+const hkGeneralHolidays2026 = new Set([
+  "2026-01-01", "2026-02-17", "2026-02-18", "2026-02-19", "2026-04-03",
+  "2026-04-04", "2026-04-06", "2026-04-07", "2026-05-01", "2026-05-25",
+  "2026-06-19", "2026-07-01", "2026-09-26", "2026-10-01", "2026-10-19",
+  "2026-12-25", "2026-12-26"
+]);
 
-  return {
-    distanceKm,
-    durationMin,
-    tunnelFee: toll.fee,
-    energyCost,
-    total,
-    fuelCarCost,
-    fuelSavings: Math.max(0, fuelCarCost - total),
-    tollRule: toll.rule
-  };
+const routeTunnelDetectors = [
+  { id: "western", name: "Western Harbour Crossing", points: [{ lat: 22.297361, lng: 114.153278 }, { lat: 22.297139, lng: 114.152917 }], radius: 520 },
+  { id: "cross-harbour", name: "Cross-Harbour Tunnel", points: [{ lat: 22.289806, lng: 114.182389 }, { lat: 22.29, lng: 114.182222 }], radius: 520 },
+  { id: "eastern", name: "Eastern Harbour Crossing", points: [{ lat: 22.296139, lng: 114.224833 }, { lat: 22.295944, lng: 114.224222 }], radius: 520 },
+  { id: "tai-lam", name: "Tai Lam Tunnel", points: [{ lat: 22.387111, lng: 114.062722 }], radius: 520 },
+  { id: "lion-rock", name: "Lion Rock Tunnel", points: [{ lat: 22.351611, lng: 114.177389 }, { lat: 22.351194, lng: 114.177056 }], radius: 420 },
+  { id: "tates-cairn", name: "Tate's Cairn Tunnel", points: [{ lat: 22.358444, lng: 114.210583 }, { lat: 22.359, lng: 114.210333 }], radius: 420 },
+  { id: "eagles-nest", name: "Eagle's Nest / Sha Tin Heights / Tai Wai Tunnel", points: [{ lat: 22.351722, lng: 114.158889 }, { lat: 22.351611, lng: 114.158222 }], radius: 120 },
+  { id: "shing-mun", name: "Shing Mun Tunnels", points: [{ lat: 22.37625, lng: 114.150528 }, { lat: 22.376611, lng: 114.150361 }], radius: 420 }
+];
+
+const weekMs = 7 * 24 * 60 * 60 * 1000;
+
+export function calculateTripEstimate(distanceKm: number, durationMin: number, planId: string, tunnelId: string, at = new Date()): TripEstimate {
+  const toll = getTunnelFee(tunnelId, at);
+  return buildTripEstimate(distanceKm, durationMin, planId, toll.fee, toll.rule);
+}
+
+export function calculateTripEstimateWithToll(distanceKm: number, durationMin: number, planId: string, tunnelFee: number, tollRule: string): TripEstimate {
+  return buildTripEstimate(distanceKm, durationMin, planId, tunnelFee, tollRule);
 }
 
 export function getTunnelFee(tunnelId: string, date = new Date()): TollResult {
   const tunnel = tunnelOptions.find((item) => item.id === tunnelId) ?? tunnelOptions[0];
-  if (tunnel.kind === "harbour") return harbourFee(tunnel.name, date);
+  if (tunnel.kind === "harbour") return harbourFee(tunnel.id, date);
   if (tunnel.kind === "tai-lam") return taiLamFee(date);
   return { fee: "fee" in tunnel ? tunnel.fee : 0, rule: tunnel.id === "none" ? "No tunnel selected" : "Fixed toll" };
 }
 
 export function getCurrentTunnelFees(date = new Date()) {
   return [
-    { name: "西隧", ...harbourFee("西隧", date) },
-    { name: "紅隧", ...harbourFee("紅隧", date) },
-    { name: "東隧", ...harbourFee("東隧", date) },
-    { name: "大欖隧道", ...taiLamFee(date) },
+    { name: "Western Harbour Crossing", ...harbourFee("western", date) },
+    { name: "Cross-Harbour Tunnel", ...harbourFee("cross-harbour", date) },
+    { name: "Eastern Harbour Crossing", ...harbourFee("eastern", date) },
+    { name: "Tai Lam Tunnel", ...taiLamFee(date) },
     ...fixedTunnels.map((item) => ({ name: item.name, fee: item.fee, rule: item.rule }))
   ];
+}
+
+export function detectRouteTunnels(points: LatLngPoint[], date = new Date()): RouteTunnelDetail[] {
+  const detected = routeTunnelDetectors.filter((tunnel) =>
+    tunnel.points.some((gate) => points.some((point) => distanceMeters(point, gate) <= tunnel.radius))
+  );
+
+  return detected.map((tunnel) => {
+    const toll = getTunnelFee(tunnel.id, date);
+    return { id: tunnel.id, name: tunnel.name, ...toll };
+  });
 }
 
 export function describeChargingSlot(now = new Date()) {
@@ -131,6 +154,24 @@ export function formatDateTime(date: Date) {
     minute: "2-digit",
     hour12: false
   }).format(date);
+}
+
+function buildTripEstimate(distanceKm: number, durationMin: number, planId: string, tunnelFee: number, tollRule: string): TripEstimate {
+  const plan = chargingPlans.find((item) => item.id === planId) ?? chargingPlans[0];
+  const energyCost = distanceKm * plan.efficiency * plan.rate;
+  const total = energyCost + tunnelFee;
+  const fuelCarCost = distanceKm * FUEL_CAR_COST_PER_KM + tunnelFee;
+
+  return {
+    distanceKm,
+    durationMin,
+    tunnelFee,
+    energyCost,
+    total,
+    fuelCarCost,
+    fuelSavings: Math.max(0, fuelCarCost - total),
+    tollRule
+  };
 }
 
 function buildSlotOccurrences(now: Date) {
@@ -179,9 +220,9 @@ function transition(minutes: number, start: number, first: number, step: number,
   return first + Math.floor(Math.max(0, minutes - start) / stepMinutes) * step;
 }
 
-function harbourFee(tunnel: string, date: Date): TollResult {
+function harbourFee(tunnelId: string, date: Date): TollResult {
   const m = minutesOfDay(date);
-  const west = tunnel === "西隧";
+  const west = tunnelId === "western";
   if (isSundayOrHoliday(date)) {
     if (m <= 610) return { fee: 20, rule: "Holiday off-peak" };
     if (m <= 614) return { fee: transition(m, 611, 21, 2), rule: "Holiday transition" };
@@ -218,4 +259,15 @@ function taiLamFee(date: Date): TollResult {
   if (m <= 1139) return { fee: 45, rule: "Evening peak" };
   if (m <= 1165) return { fee: transition(m, 1140, 43, -2), rule: "Night transition" };
   return { fee: 18, rule: "Off-peak" };
+}
+
+function distanceMeters(a: LatLngPoint, b: LatLngPoint) {
+  const radius = 6371000;
+  const toRad = (value: number) => (value * Math.PI) / 180;
+  const dLat = toRad(b.lat - a.lat);
+  const dLng = toRad(b.lng - a.lng);
+  const lat1 = toRad(a.lat);
+  const lat2 = toRad(b.lat);
+  const h = Math.sin(dLat / 2) ** 2 + Math.cos(lat1) * Math.cos(lat2) * Math.sin(dLng / 2) ** 2;
+  return 2 * radius * Math.asin(Math.sqrt(h));
 }

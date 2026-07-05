@@ -77,7 +77,7 @@ export function LtravelLogFrame({
 }) {
   return (
     <AppShell websites={ltravelLogTools} showHeader={false} showBottomNav={false}>
-      <main className="relative min-h-[100svh] overflow-hidden bg-white lg:grid lg:grid-cols-[minmax(420px,38vw)_1fr]">
+      <main className="relative min-h-[100svh] overflow-hidden bg-white lg:grid lg:grid-cols-[minmax(420px,min(780px,48vw))_1fr]">
         <aside className="relative z-20 hidden h-screen overflow-y-auto border-r border-black/[0.05] bg-white px-10 py-10 lg:block">
           <LeftContent activeId={activeId} />
         </aside>
@@ -87,10 +87,35 @@ export function LtravelLogFrame({
           <div className="relative z-10 lg:hidden">
             <MobileHeader title={mobileTitle ?? "LTravelLog"} subtitle={mobileSubtitle ?? "AnotherOne"} />
           </div>
-          <div className="relative z-10">{right ?? children}</div>
+          <div className="relative z-10">{right ?? children ?? <MobileToolList activeId={activeId} />}</div>
         </section>
       </main>
     </AppShell>
+  );
+}
+
+function MobileToolList({ activeId }: { activeId?: string }) {
+  return (
+    <div className="space-y-5 px-5 pb-28 pt-8 lg:hidden">
+      {ltravelLogTools.map((tool, index) => (
+        <Link key={tool.id} href={tool.url as Route} className="grid w-full grid-cols-[52px_1fr] gap-3 text-left">
+          <div className="flex min-h-[116px] items-center justify-center bg-white/70">
+            <span className="max-h-[96px] text-center text-[11px] font-black uppercase leading-4 tracking-[0.16em] text-ink [writing-mode:vertical-rl]">
+              {tool.title}
+            </span>
+          </div>
+          <div className={`min-h-[116px] overflow-hidden rounded-[5px] shadow-[0_18px_48px_rgba(34,34,34,0.08)] ${activeId === tool.id ? "ring-2 ring-ink/15" : ""}`}>
+            <div className={`relative h-[116px] bg-[radial-gradient(circle_at_30%_20%,rgba(255,255,255,.75),transparent_6rem),linear-gradient(135deg,#dfe7dd,#c8d7dd,#d9bca7)] ${index === 1 ? "hue-rotate-[12deg]" : ""} ${index === 2 ? "hue-rotate-[26deg]" : ""}`}>
+              <div className="absolute inset-0 bg-gradient-to-r from-black/10 via-transparent to-black/10" />
+              <div className="absolute bottom-4 left-5 right-5 text-white">
+                <p className="text-[9px] font-black uppercase tracking-[0.18em] opacity-80">{tool.category}</p>
+                <p className="mt-1 text-sm font-black drop-shadow-sm">{tool.description}</p>
+              </div>
+            </div>
+          </div>
+        </Link>
+      ))}
+    </div>
   );
 }
 
