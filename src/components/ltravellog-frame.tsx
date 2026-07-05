@@ -77,7 +77,7 @@ export function LtravelLogFrame({
 }) {
   return (
     <AppShell websites={ltravelLogTools} showHeader={false} showBottomNav={false}>
-      <main className="relative min-h-[100svh] overflow-hidden bg-white lg:grid lg:grid-cols-[minmax(420px,min(780px,48vw))_1fr]">
+      <main className="relative min-h-[100svh] overflow-hidden bg-white lg:grid lg:grid-cols-[38vw_62vw]">
         <aside className="relative z-20 hidden h-screen overflow-y-auto border-r border-black/[0.05] bg-white px-10 py-10 lg:block">
           <LeftContent activeId={activeId} />
         </aside>
@@ -85,7 +85,11 @@ export function LtravelLogFrame({
         <section className="relative min-h-[100svh] bg-white">
           {showMap ? <LtravelLogMapBackground /> : null}
           <div className="relative z-10 lg:hidden">
-            <MobileHeader title={mobileTitle ?? "LTravelLog"} subtitle={mobileSubtitle ?? "AnotherOne"} />
+            <MobileHeader
+              title={mobileTitle ?? "LTravelLog"}
+              subtitle={mobileSubtitle ?? "AnotherOne"}
+              backHref={activeId ? "/ltravellog/categories" : "/ltravellog"}
+            />
           </div>
           <div className="relative z-10">{right ?? children ?? <MobileToolList activeId={activeId} />}</div>
         </section>
@@ -189,10 +193,10 @@ function LeftContent({ activeId }: { activeId?: string }) {
   );
 }
 
-function MobileHeader({ title, subtitle }: { title: string; subtitle: string }) {
+function MobileHeader({ title, subtitle, backHref }: { title: string; subtitle: string; backHref: Route }) {
   return (
     <div className="flex items-center justify-between px-5 pt-5">
-      <Link href={"/ltravellog/categories" as Route} className="inline-flex h-12 w-12 items-center justify-center rounded-full bg-white/55 text-ink shadow-[0_12px_28px_rgba(34,34,34,0.08)] backdrop-blur" aria-label="Back">
+      <Link href={backHref} className="inline-flex h-12 w-12 items-center justify-center rounded-full bg-white/55 text-ink shadow-[0_12px_28px_rgba(34,34,34,0.08)] backdrop-blur" aria-label="Back">
         <ArrowLeft size={19} />
       </Link>
       <div className="text-center">

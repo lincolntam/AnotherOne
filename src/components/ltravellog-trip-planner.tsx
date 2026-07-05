@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
-import { ArrowUpDown, CornerDownLeft, LocateFixed, MapPin, Route } from "lucide-react";
+import { ArrowUpDown, Car, CornerDownLeft, LocateFixed, MapPin, Route, Zap } from "lucide-react";
 import { LtravelLogFrame } from "@/components/ltravellog-frame";
 import {
   calculateTripEstimate,
@@ -185,15 +185,16 @@ export function LtravelLogTripPlanner() {
     setIsPlanning(true);
     setRouteMessage("Planning route...");
     const maps = window.google.maps;
+    const routeDestination = returnTrip ? origin : destination;
     const selectedWaypoints = [
       ...waypoints.filter(Boolean),
-      ...(returnTrip ? [origin].filter(Boolean) : [])
+      ...(returnTrip ? [destination].filter(Boolean) : [])
     ].map((location) => ({ location, stopover: true }));
 
     directionsServiceRef.current.route(
       {
         origin,
-        destination,
+        destination: routeDestination,
         waypoints: selectedWaypoints,
         travelMode: maps.TravelMode.DRIVING,
         avoidTolls
@@ -220,6 +221,25 @@ export function LtravelLogTripPlanner() {
         setRouteDetails(tunnelId === "auto" ? autoDetected : manualDetail);
         setRouteMessage(autoDetected.length || manualDetail.length ? "Route planned with tunnel fee." : "Route planned.");
       }
+    );
+  }
+
+  function useCurrentLocation(target: "origin" | "destination") {
+    if (!navigator.geolocation) {
+      setRouteMessage("Current location is not supported.");
+      return;
+    }
+
+    setRouteMessage("Getting current location...");
+    navigator.geolocation.getCurrentPosition(
+      (position) => {
+        const value = `${position.coords.latitude.toFixed(6)},${position.coords.longitude.toFixed(6)}`;
+        if (target === "origin") setOrigin(value);
+        if (target === "destination") setDestination(value);
+        setRouteMessage("Current location added.");
+      },
+      () => setRouteMessage("Unable to get current location."),
+      { enableHighAccuracy: true, timeout: 10000, maximumAge: 60000 }
     );
   }
 
@@ -262,6 +282,7 @@ export function LtravelLogTripPlanner() {
             onPlanChange={setPlanId}
             onTunnelChange={setTunnelId}
             onAvoidTollsChange={setAvoidTolls}
+            onUseCurrentLocation={useCurrentLocation}
             onPlan={planRoute}
             className="relative z-10 lg:absolute lg:bottom-10 lg:left-10 lg:w-[360px] xl:w-[400px]"
           />
@@ -313,6 +334,7 @@ function PlannerSheet({
   onPlanChange,
   onTunnelChange,
   onAvoidTollsChange,
+  onUseCurrentLocation,
   onPlan,
   className
 }: {
@@ -342,6 +364,7 @@ function PlannerSheet({
   onPlanChange: (value: string) => void;
   onTunnelChange: (value: string) => void;
   onAvoidTollsChange: (value: boolean) => void;
+  onUseCurrentLocation: (target: "origin" | "destination") => void;
   onPlan: () => void;
   className?: string;
 }) {
@@ -349,10 +372,10 @@ function PlannerSheet({
     <form className={`rounded-[34px] bg-[#6f7679]/88 p-5 text-white shadow-[0_22px_70px_rgba(34,34,34,0.28)] backdrop-blur-xl ${className ?? ""}`} onSubmit={(event) => { event.preventDefault(); onPlan(); }}>
       <div className="mx-auto mb-5 h-1.5 w-14 rounded-full bg-white/20" />
       <div className="space-y-3">
-        <SheetField label="Origin" icon={<LocateFixed size={24} />}>
+        <SheetField label="Origin" icon={<button type="button" aria-label="Use current location for origin" onClick={() => onUseCurrentLocation("origin")}><LocateFixed size={24} /></button>}>
           <input ref={originInputRef} className={sheetInputClass} value={origin} placeholder="Enter address or use current location" onChange={(event) => onOriginChange(event.target.value)} />
         </SheetField>
-        <SheetField label="Destination" icon={<LocateFixed size={24} />}>
+        <SheetField label="Destination" icon={<button type="button" aria-label="Use current location for destination" onClick={() => onUseCurrentLocation("destination")}><LocateFixed size={24} /></button>}>
           <input ref={destinationInputRef} className={sheetInputClass} value={destination} placeholder="Where do you want to go?" onChange={(event) => onDestinationChange(event.target.value)} />
         </SheetField>
         {waypoints.map((waypoint, index) => (
@@ -392,6 +415,7 @@ function PlannerSheet({
             {tunnelOptions.map((tunnel) => <option key={tunnel.id} value={tunnel.id}>{tunnel.name}</option>)}
           </select>
         </SheetField>
+        <TunnelPicker activeId={tunnelId} disabled={avoidTolls} onChange={onTunnelChange} />
         <label className="flex items-center justify-between rounded-2xl border border-white/20 bg-white/10 px-4 py-3 text-sm font-bold text-white/85">
           Avoid toll roads
           <input className="h-7 w-7 accent-white" type="checkbox" checked={avoidTolls} onChange={(event) => onAvoidTollsChange(event.target.checked)} />
@@ -405,6 +429,7 @@ function PlannerSheet({
           <p>{mapsReady ? routeMessage : mapError || "Loading Google Maps..."}</p>
           {routeDetails.length ? <p className="mt-1">{routeDetails.map((detail) => `${detail.name} HK$${detail.fee}`).join(" + ")}</p> : null}
         </div>
+        <RouteSummary estimate={estimate} routeDetails={routeDetails} distance={distance} duration={duration} />
         <button className="flex w-full items-center justify-center gap-2 rounded-2xl bg-[#d57783] px-5 py-4 text-lg font-black text-white shadow-[0_16px_32px_rgba(148,67,78,0.28)] transition active:scale-[0.99]" type="submit" disabled={isPlanning}>
           <Route size={20} /> {isPlanning ? "Planning..." : `Start planning HK$${estimate.total.toFixed(1)}`}
         </button>
@@ -412,6 +437,72 @@ function PlannerSheet({
       <p className="mt-5 text-center text-xs font-bold text-white/35">v0.55.14</p>
     </form>
   );
+}
+
+function TunnelPicker({ activeId, disabled, onChange }: { activeId: string; disabled: boolean; onChange: (value: string) => void }) {
+  return (
+    <div className="grid grid-cols-3 gap-2">
+      {tunnelOptions.slice(0, 8).map((tunnel) => (
+        <button
+          key={tunnel.id}
+          type="button"
+          disabled={disabled}
+          onClick={() => onChange(tunnel.id)}
+          className={`min-h-11 rounded-2xl border px-2 py-2 text-[10px] font-black leading-tight transition active:scale-[0.98] disabled:opacity-35 ${
+            activeId === tunnel.id ? "border-white/45 bg-white/[0.24] text-white" : "border-white/15 bg-white/[0.08] text-white/70"
+          }`}
+        >
+          {shortTunnelName(tunnel.name)}
+        </button>
+      ))}
+    </div>
+  );
+}
+
+function RouteSummary({ estimate, routeDetails, distance, duration }: { estimate: TripEstimate; routeDetails: RouteTunnelDetail[]; distance: number; duration: number }) {
+  return (
+    <section className="rounded-3xl border border-white/15 bg-black/[0.16] p-4 text-white">
+      <div className="flex items-end justify-between gap-3">
+        <div>
+          <p className="text-[10px] font-black uppercase tracking-[0.18em] text-white/45">Route estimate</p>
+          <p className="mt-1 text-xl font-black">HK${estimate.total.toFixed(1)}</p>
+        </div>
+        <p className="text-right text-xs font-bold text-white/55">{distance.toFixed(1)} km / {duration} min</p>
+      </div>
+      <div className="mt-4 grid grid-cols-2 gap-2">
+        <RouteMetric icon={<Route size={15} />} label="Tunnel" value={`HK$${estimate.tunnelFee}`} />
+        <RouteMetric icon={<Zap size={15} />} label="EV" value={`HK$${estimate.energyCost.toFixed(1)}`} />
+        <RouteMetric icon={<Car size={15} />} label="Fuel car" value={`HK$${estimate.fuelCarCost.toFixed(1)}`} />
+        <RouteMetric icon={<Zap size={15} />} label="Save" value={`HK$${estimate.fuelSavings.toFixed(1)}`} />
+      </div>
+      <p className="mt-3 line-clamp-2 text-[11px] font-bold leading-5 text-white/52">
+        {routeDetails.length ? routeDetails.map((detail) => `${detail.name} HK$${detail.fee}`).join(" + ") : estimate.tollRule}
+      </p>
+    </section>
+  );
+}
+
+function RouteMetric({ icon, label, value }: { icon: React.ReactNode; label: string; value: string }) {
+  return (
+    <div className="rounded-2xl bg-white/10 px-3 py-2">
+      <div className="flex items-center gap-1.5 text-[9px] font-black uppercase tracking-[0.12em] text-white/45">
+        {icon}
+        {label}
+      </div>
+      <p className="mt-1 text-sm font-black text-white">{value}</p>
+    </div>
+  );
+}
+
+function shortTunnelName(name: string) {
+  return name
+    .replace("Harbour Crossing", "HC")
+    .replace("Cross-Harbour", "CHT")
+    .replace("Tunnel", "")
+    .replace("Tunnels", "")
+    .replace("Auto detect", "Auto")
+    .replace("No tunnel", "None")
+    .trim();
 }
 
 function SheetField({ label, icon, children }: { label: string; icon?: React.ReactNode; children: React.ReactNode }) {
