@@ -2,6 +2,7 @@
 
 import { AnimatePresence, motion } from "framer-motion";
 import { ArrowLeft, LogOut, Menu, Search, Settings, UserRound } from "lucide-react";
+import type { Route } from "next";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useState } from "react";
@@ -17,7 +18,13 @@ export function Header({ onOpenSetting }: HeaderProps) {
   const pathname = usePathname();
   const setSearchOpen = useSearchStore((state) => state.setOpen);
   const logout = useAuthStore((state) => state.logout);
-  const categoriesHref = pathname.startsWith("/secret/anotherwm") ? "/secret/anotherwm/categories" : pathname.startsWith("/secret") ? "/secret/categories" : "/categories";
+  const categoriesHref = pathname.startsWith("/secret/anotherwm")
+    ? "/secret/anotherwm/categories"
+    : pathname.startsWith("/secret")
+      ? "/secret/categories"
+      : pathname.startsWith("/ltravellog")
+        ? "/ltravellog/categories"
+        : "/categories";
   const secretExitHref = pathname.startsWith("/secret/anotherwm") ? "/secret" : pathname.startsWith("/secret") ? "/home" : "";
 
   return (
@@ -33,7 +40,7 @@ export function Header({ onOpenSetting }: HeaderProps) {
         AnotherOne <span className="text-xs text-graphite/45">v</span>
       </button>
 
-      <Link className="ao-icon-button" aria-label="Categories" href={categoriesHref}>
+      <Link className="ao-icon-button" aria-label="Categories" href={categoriesHref as Route}>
         <Menu size={18} strokeWidth={1.8} />
       </Link>
 

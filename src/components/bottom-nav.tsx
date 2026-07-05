@@ -1,6 +1,7 @@
 "use client";
 
 import { CalendarDays, CloudSun, Home, Pencil, Search } from "lucide-react";
+import type { Route } from "next";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useSearchStore } from "@/stores/search-store";
@@ -10,8 +11,15 @@ export function BottomNav() {
   const setSearchOpen = useSearchStore((state) => state.setOpen);
   const inAnotherWM = pathname.startsWith("/secret/anotherwm");
   const inAnotherWMList = pathname === "/secret/anotherwm/list";
-  const journalHref = inAnotherWM ? (pathname === "/secret/anotherwm" ? "/secret/anotherwm/categories" : "/secret/anotherwm") : pathname === "/categories" ? "/home" : "/categories";
-  const journalIsHome = inAnotherWM ? pathname !== "/secret/anotherwm" : pathname === "/categories";
+  const inLtravelLog = pathname.startsWith("/ltravellog");
+  const journalHref = inAnotherWM
+    ? (pathname === "/secret/anotherwm" ? "/secret/anotherwm/categories" : "/secret/anotherwm")
+    : inLtravelLog
+      ? (pathname === "/ltravellog" ? "/ltravellog/categories" : "/ltravellog")
+      : pathname === "/categories"
+        ? "/home"
+        : "/categories";
+  const journalIsHome = inAnotherWM ? pathname !== "/secret/anotherwm" : inLtravelLog ? pathname !== "/ltravellog" : pathname === "/categories";
 
   function handleEdit(event: React.MouseEvent<HTMLAnchorElement>) {
     if (!inAnotherWM) return;
@@ -45,7 +53,7 @@ export function BottomNav() {
           <Link href={inAnotherWM ? "/secret/anotherwm" : "/websites"} aria-label={inAnotherWM ? "Add watchlist URL" : "Edit websites"} onClick={handleEdit} className="inline-flex h-12 w-12 items-center justify-center rounded-full bg-ink text-white shadow-[0_12px_24px_rgba(0,0,0,0.16)] transition active:scale-95">
             <Pencil size={18} />
           </Link>
-          <Link href={journalHref} aria-label={inAnotherWMList ? "Search watchlist" : "Open journal list"} onClick={handleJournal} className="inline-flex h-12 w-12 items-center justify-center rounded-full bg-ink text-white shadow-[0_12px_24px_rgba(0,0,0,0.16)] transition active:scale-95">
+          <Link href={journalHref as Route} aria-label={inAnotherWMList ? "Search watchlist" : "Open journal list"} onClick={handleJournal} className="inline-flex h-12 w-12 items-center justify-center rounded-full bg-ink text-white shadow-[0_12px_24px_rgba(0,0,0,0.16)] transition active:scale-95">
             {inAnotherWMList ? <Search size={18} /> : journalIsHome ? <Home size={18} /> : <CalendarDays size={18} />}
           </Link>
         </div>
