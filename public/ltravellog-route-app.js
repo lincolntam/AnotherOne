@@ -100,7 +100,7 @@ function bindUi() {
     document.getElementById("back-btn").addEventListener("click", goHome);
     document.getElementById("menu-btn").addEventListener("click", goHome);
     document.getElementById("collapse-trip-btn").addEventListener("click", toggleTripCard);
-    document.getElementById("logout-btn").addEventListener("click", logout);
+    document.getElementById("logout-btn")?.addEventListener("click", logout);
     document.getElementById("add-waypoint-btn").addEventListener("click", () => addWaypoint());
     document.getElementById("swap-route-btn").addEventListener("click", swapRoute);
     document.getElementById("return-route-btn").addEventListener("click", toggleReturnRoute);

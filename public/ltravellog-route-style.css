@@ -33,6 +33,10 @@ body {
 button, input, select { font: inherit; }
 button { cursor: pointer; }
 
+.desktop-side {
+    display: none;
+}
+
 .phone-shell {
     position: relative;
     width: min(100vw, 430px);
@@ -335,6 +339,12 @@ position: absolute;
     appearance: none;
 }
 
+.compact-settings select,
+.compact-settings select option {
+    color: #151515;
+    background: #ffffff;
+}
+
 .toggle-setting {
     min-height: 46px;
     border: 1px solid var(--line);
@@ -592,6 +602,11 @@ position: absolute;
 }
 
 @media (min-width: 768px) {
+    :root {
+        --desktop-left: clamp(430px, 38vw, 780px);
+        --desktop-gutter: 48px;
+    }
+
     body {
         display: block;
         padding: 0;
@@ -607,6 +622,122 @@ position: absolute;
         box-shadow: none;
     }
 
+    .desktop-side {
+        position: absolute;
+        inset: 0 auto 0 0;
+        z-index: 6;
+        display: block;
+        width: var(--desktop-left);
+        background: #ffffff;
+        border-right: 1px solid rgba(0, 0, 0, 0.05);
+        color: #181817;
+    }
+
+    .desktop-back {
+        position: absolute;
+        left: 32px;
+        top: 42px;
+        width: 44px;
+        height: 44px;
+        border: 0;
+        border-radius: 50%;
+        background: transparent;
+        color: #222222;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .desktop-back .material-icons {
+        font-size: 24px;
+    }
+
+    .desktop-title {
+        position: absolute;
+        top: 64px;
+        left: 0;
+        right: 0;
+        text-align: center;
+        font-size: 11px;
+        font-weight: 900;
+        letter-spacing: 0.28em;
+        text-transform: uppercase;
+    }
+
+    .desktop-list {
+        position: absolute;
+        left: 96px;
+        right: 52px;
+        top: 145px;
+        display: grid;
+        gap: 24px;
+    }
+
+    .desktop-card {
+        position: relative;
+        min-height: 112px;
+        border-radius: 6px;
+        padding: 44px 28px 22px;
+        color: #ffffff;
+        text-decoration: none;
+        overflow: visible;
+        background:
+            linear-gradient(115deg, rgba(209, 228, 223, 0.88), rgba(203, 186, 172, 0.92)),
+            rgba(218, 222, 218, 0.88);
+        box-shadow: 0 22px 46px rgba(35, 37, 39, 0.08);
+    }
+
+    .desktop-card:nth-child(2) {
+        background:
+            linear-gradient(115deg, rgba(211, 231, 225, 0.86), rgba(196, 179, 159, 0.9)),
+            rgba(218, 222, 218, 0.88);
+    }
+
+    .desktop-card:nth-child(3) {
+        background:
+            linear-gradient(115deg, rgba(207, 222, 231, 0.86), rgba(184, 175, 151, 0.9)),
+            rgba(218, 222, 218, 0.88);
+    }
+
+    .desktop-card strong,
+    .desktop-card small {
+        position: relative;
+        z-index: 1;
+        display: block;
+    }
+
+    .desktop-card strong {
+        font-size: 14px;
+        font-weight: 900;
+    }
+
+    .desktop-card small {
+        margin-top: 8px;
+        max-width: 320px;
+        font-size: 12px;
+        font-weight: 800;
+        line-height: 1.45;
+    }
+
+    .vertical-label {
+        position: absolute;
+        left: -56px;
+        top: 50%;
+        transform: translateY(-50%);
+        writing-mode: vertical-rl;
+        text-orientation: mixed;
+        color: #191919;
+        font-size: 10px;
+        font-weight: 900;
+        letter-spacing: 0.18em;
+        text-transform: uppercase;
+    }
+
+    #map,
+    .map-fade {
+        left: var(--desktop-left);
+    }
+
     @supports (height: 100dvh) {
         .phone-shell {
             height: 100dvh;
@@ -614,6 +745,8 @@ position: absolute;
     }
 
     .top-bar {
+        left: var(--desktop-left);
+        width: calc(100vw - var(--desktop-left));
         grid-template-columns: 52px 1fr 52px;
         padding: max(24px, env(safe-area-inset-top)) 32px 0;
     }
@@ -629,7 +762,7 @@ position: absolute;
 
     .bottom-sheet {
         width: min(430px, calc(100vw - 64px));
-        left: 32px;
+        left: calc(var(--desktop-left) + var(--desktop-gutter));
         right: auto;
         bottom: 20px;
     }
@@ -661,7 +794,7 @@ position: absolute;
     }
 
     .search-sheet {
-        left: 48px;
+        left: calc(var(--desktop-left) + var(--desktop-gutter));
         bottom: 28px;
     }
 
