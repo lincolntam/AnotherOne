@@ -1,5 +1,5 @@
-import { LtravelLogTripPlanner } from "@/components/ltravellog-trip-planner";
+import { LtravelLogRouteEmbed } from "@/components/ltravellog-route-embed";
 
 export default function LtravelLogTripPlannerPage() {
-  return <LtravelLogTripPlanner />;
+  return <LtravelLogRouteEmbed />;
 }

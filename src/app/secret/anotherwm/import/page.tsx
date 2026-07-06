@@ -147,7 +147,9 @@ function createWatchlistItem(payload: ImportPayload): WatchlistItem {
 
   const rawText = cleanText(payload.selectedText || payload.rawText || payload.description || "");
   const site = getSite(payload.site || sourceUrl);
-  const code = normalizeCode(payload.code || readAnyLabel(rawText, codeLabels) || extractCode(sourceUrl) || extractCode(payload.title || "") || extractCode(rawText));
+  const urlCode = extractCodeFromUrlPath(sourceUrl);
+  const parsedCode = normalizeCode(payload.code || readAnyLabel(rawText, codeLabels) || extractCode(sourceUrl) || extractCode(payload.title || "") || extractCode(rawText));
+  const code = preferPaddedCode(urlCode, parsedCode);
   const title = cleanTitle(payload.title || readAnyLabel(rawText, titleLabels) || code || sourceUrl, code);
 
   return normalizeWatchlistItem({
@@ -176,6 +178,32 @@ function getSite(value: string): WatchlistItem["site"] {
 function extractCode(value: string) {
   const match = /([a-z]{2,8})[-_ ]?(\d{2,6})/iu.exec(value);
   return match ? `${match[1]}-${match[2]}` : "";
+}
+
+function extractCodeFromUrlPath(value: string) {
+  try {
+    const parts = new URL(value).pathname.split("/").filter(Boolean).reverse();
+    for (const part of parts) {
+      const match = /^([a-z]{2,8})[-_ ]?(\d{2,6})$/iu.exec(part);
+      if (match) return `${match[1]}-${match[2]}`;
+    }
+  } catch {
+    // Keep the generic parser as the fallback for non-URL strings.
+  }
+  return "";
+}
+
+function preferPaddedCode(urlCode: string, parsedCode: string) {
+  const normalizedUrl = normalizeCode(urlCode);
+  const normalizedParsed = normalizeCode(parsedCode);
+  const urlMatch = /^([A-Z]{2,8})-(\d{2,6})$/u.exec(normalizedUrl);
+  const parsedMatch = /^([A-Z]{2,8})-(\d{2,6})$/u.exec(normalizedParsed);
+
+  if (urlMatch && parsedMatch && urlMatch[1] === parsedMatch[1] && Number(urlMatch[2]) === Number(parsedMatch[2]) && urlMatch[2].length > parsedMatch[2].length) {
+    return normalizedUrl;
+  }
+
+  return normalizedParsed || normalizedUrl;
 }
 
 function createId(code: string, sourceUrl: string) {

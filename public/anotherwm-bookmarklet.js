@@ -33,9 +33,22 @@
     return node ? node.content || "" : "";
   }
 
+  function formatCode(prefix, digits) {
+    return prefix && digits ? prefix.toUpperCase() + "-" + digits : "";
+  }
+
   function codeFrom(value) {
     var match = String(value || "").match(/([a-z]{2,8})[-_ ]?(\d{2,6})/i);
-    return match ? match[1].toUpperCase() + "-" + match[2] : "";
+    return match ? formatCode(match[1], match[2]) : "";
+  }
+
+  function codeFromUrlPath() {
+    var parts = location.pathname.split("/").filter(Boolean).reverse();
+    for (var i = 0; i < parts.length; i += 1) {
+      var match = parts[i].match(/^([a-z]{2,8})[-_ ]?(\d{2,6})$/i);
+      if (match) return formatCode(match[1], match[2]);
+    }
+    return "";
   }
 
   function escapeRegExp(value) {
@@ -113,7 +126,7 @@
     }
 
     return uniqueLinks(labelText(labels)
-      .split(/[,，、/]/)
+      .split(/[,，、]/)
       .map(function (name) {
         return { name: clean(name) };
       })
@@ -144,7 +157,7 @@
 
   var rawText = clean(document.body.innerText || document.body.textContent || "");
   var pageTitle = clean((document.querySelector("h1") || {}).innerText || document.title);
-  var code = codeFrom(location.href + " " + pageTitle + " " + rawText) || codeFrom(labelText(LABELS.code));
+  var code = codeFromUrlPath() || codeFrom(labelText(LABELS.code)) || codeFrom(pageTitle + " " + rawText);
   var releaseRaw = labelText(LABELS.releaseDate);
   var releaseMatch = releaseRaw.match(/(\d{4})[-/](\d{1,2})[-/](\d{1,2})/);
   var releaseDate = releaseMatch ? releaseMatch[1] + "-" + releaseMatch[2].padStart(2, "0") + "-" + releaseMatch[3].padStart(2, "0") : "";

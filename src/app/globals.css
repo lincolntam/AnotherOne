@@ -78,6 +78,10 @@ select {
       padding-bottom: calc(env(safe-area-inset-bottom, 0px) + 6rem);
     }
 
+    .ao-phone.ao-phone-full {
+      padding: 0;
+    }
+
     .ao-phone::before {
       display: none;
     }

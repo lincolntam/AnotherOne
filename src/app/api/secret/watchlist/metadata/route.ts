@@ -41,7 +41,7 @@ export async function POST(request: Request) {
 
       const html = await response.text();
       const title = cleanText(extractMeta(html, "og:title") || extractTag(html, "h1") || extractTitle(html) || fallback.title);
-      const code = extractCode(`${parsed.pathname} ${title}`) || fallback.code;
+      const code = preferPaddedCode(extractCodeFromUrlPath(parsed.href), extractCode(`${parsed.pathname} ${title}`) || fallback.code);
       const item: WatchlistItem = {
         id: createId(code, parsed.href),
         sourceUrl: parsed.href,
@@ -84,7 +84,7 @@ function getSite(hostname: string): WatchlistItem["site"] {
 }
 
 function createFallbackItem(sourceUrl: string, site: WatchlistItem["site"]): WatchlistItem {
-  const code = extractCode(sourceUrl);
+  const code = preferPaddedCode(extractCodeFromUrlPath(sourceUrl), extractCode(sourceUrl));
   return {
     id: createId(code, sourceUrl),
     sourceUrl,
@@ -162,7 +162,7 @@ async function fetchMetadataCandidate(parsed: URL, fallback: WatchlistItem): Pro
 
   const html = await response.text();
   const title = cleanText(extractMeta(html, "og:title") || extractTag(html, "h1") || extractTitle(html) || fallback.title);
-  const code = extractCode(`${parsed.pathname} ${title}`) || fallback.code;
+  const code = preferPaddedCode(extractCodeFromUrlPath(parsed.href), extractCode(`${parsed.pathname} ${title}`) || fallback.code);
 
   return {
     ...fallback,
@@ -214,6 +214,30 @@ function extractCoverImage(html: string) {
 function extractCode(value: string) {
   const match = /([a-z]{2,8})[-_ ]?(\d{2,6})/iu.exec(value);
   return match ? `${match[1].toUpperCase()}-${match[2]}` : "";
+}
+
+function extractCodeFromUrlPath(value: string) {
+  try {
+    const parts = new URL(value).pathname.split("/").filter(Boolean).reverse();
+    for (const part of parts) {
+      const match = /^([a-z]{2,8})[-_ ]?(\d{2,6})$/iu.exec(part);
+      if (match) return `${match[1].toUpperCase()}-${match[2]}`;
+    }
+  } catch {
+    // Keep the generic parser as the fallback for non-URL strings.
+  }
+  return "";
+}
+
+function preferPaddedCode(urlCode: string, parsedCode: string) {
+  const urlMatch = /^([A-Z]{2,8})-(\d{2,6})$/u.exec(urlCode);
+  const parsedMatch = /^([A-Z]{2,8})-(\d{2,6})$/u.exec(parsedCode);
+
+  if (urlMatch && parsedMatch && urlMatch[1] === parsedMatch[1] && Number(urlMatch[2]) === Number(parsedMatch[2]) && urlMatch[2].length > parsedMatch[2].length) {
+    return urlCode;
+  }
+
+  return parsedCode || urlCode;
 }
 
 function extractReleaseDate(html: string) {
