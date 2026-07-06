@@ -44,6 +44,21 @@ const assetPaths = new Set([
 export default {
   async fetch(request, env, ctx) {
     const url = new URL(request.url);
+    if ((request.method === "GET" || request.method === "HEAD") && url.pathname === "/ltravellog-route") {
+      const response = await env.ASSETS.fetch(request);
+      if (response.status !== 404) {
+        const headers = new Headers(response.headers);
+        headers.set("content-type", "text/html; charset=utf-8");
+        headers.set("x-content-type-options", "nosniff");
+        return new Response(response.body, {
+          status: response.status,
+          statusText: response.statusText,
+          headers
+        });
+      }
+      await response.body?.cancel();
+    }
+
     if ((request.method === "GET" || request.method === "HEAD") && (assetPaths.has(url.pathname) || assetPrefixes.some((prefix) => url.pathname.startsWith(prefix)))) {
       const response = await env.ASSETS.fetch(request);
       if (response.status !== 404) return response;
