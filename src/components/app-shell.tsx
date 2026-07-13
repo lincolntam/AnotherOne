@@ -85,6 +85,7 @@ export function AppShell({ children, websites = [], showBottomNav = true, showHe
       <section className={`ao-phone ${fullScreen ? "ao-phone-full" : ""}`}>
         {showHeader ? <Header onOpenSetting={() => setSettingOpen(true)} /> : null}
         <motion.div
+          className={fullScreen ? "h-full min-h-0" : undefined}
           initial={{ opacity: 0, y: 16 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.28, ease: "easeOut" }}

@@ -12,7 +12,7 @@
     <meta name="apple-mobile-web-app-title" content="LTravelLog">
     <meta name="theme-color" content="#e7e9e8">
 
-    <link rel="stylesheet" href="/ltravellog-route-style.css?v=0.55.25">
+    <link rel="stylesheet" href="/ltravellog-route-style.css?v=0.55.26">
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
 </head>
 <body>
@@ -205,6 +205,6 @@
             <button class="primary-btn cancel-btn" id="cancel-btn" type="button">取消</button>
         </section>
     </main>
-    <script src="/ltravellog-route-app.js?v=0.55.25"></script>
+    <script src="/ltravellog-route-app.js?v=0.55.26"></script>
 </body>
 </html>
