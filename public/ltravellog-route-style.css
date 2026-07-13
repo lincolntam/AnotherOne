@@ -29,6 +29,7 @@ body {
     color: var(--ink);
     font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
     overflow: hidden;
+    overscroll-behavior: none;
 }
 button, input, select { font: inherit; }
 button { cursor: pointer; }
@@ -58,6 +59,14 @@ button { cursor: pointer; }
 }
 
 @media (max-width: 768px) {
+    html,
+    body {
+        width: 100vw;
+        height: 100dvh;
+        min-height: 100dvh;
+        overflow: hidden;
+    }
+
     body {
         background:
             linear-gradient(180deg, rgba(0, 4, 10, 0.04), rgba(7, 14, 23, 0.2) 34%, rgba(0, 2, 7, 0.74)),
@@ -69,23 +78,18 @@ button { cursor: pointer; }
         width: 100vw;
         height: 100dvh;
         min-height: 0;
-        /* 🛠️ 關鍵：允許內部超載的地圖背景往下突破邊界，絕不進行任何硬性裁切 */
-        overflow: visible !important;
+        overflow: hidden;
     }
 }
 
 #map {
-position: absolute;
-    /* 修正重點：使用 0 或者是 -env() 來徹底填滿安全區域以外的黑邊 */
+    position: absolute;
     top: 0;
     left: 0;
     right: 0;
     bottom: 0;
-    
-    /* 如果有需要強制把地圖往系統底層壓，可以延伸到 safe-area 邊界外 */
     height: 100%;
     width: 100%;
-    
     z-index: 0;
     background:
         linear-gradient(180deg, rgba(0, 4, 10, 0.04), rgba(7, 14, 23, 0.2) 34%, rgba(0, 2, 7, 0.74)),
@@ -95,7 +99,7 @@ position: absolute;
 
 .map-fade {
     position: absolute;
-    inset: calc(-1 * env(safe-area-inset-top)) 0 calc(-1 * env(safe-area-inset-bottom)) 0;
+    inset: 0;
     z-index: 1;
     pointer-events: none;
     background: linear-gradient(to bottom, rgba(231, 233, 232, 0.02), rgba(231, 233, 232, 0.08) 36%, rgba(69, 75, 82, 0.42));
@@ -108,7 +112,7 @@ position: absolute;
     grid-template-columns: 42px 1fr 42px;
     align-items: center;
     gap: 8px;
-    padding: calc(16px + env(safe-area-inset-top)) 18px 0;
+    padding: 48px 18px 0;
 }
 
 .screen-title { text-align: center; font-size: 15px; font-weight: 700; }
@@ -748,7 +752,7 @@ position: absolute;
         left: var(--desktop-left);
         width: calc(100vw - var(--desktop-left));
         grid-template-columns: 52px 1fr 52px;
-        padding: max(24px, env(safe-area-inset-top)) 32px 0;
+        padding: 32px 32px 0;
     }
 
     .icon-btn {

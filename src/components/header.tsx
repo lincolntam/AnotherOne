@@ -28,7 +28,7 @@ export function Header({ onOpenSetting }: HeaderProps) {
   const secretExitHref = pathname.startsWith("/secret/anotherwm") ? "/secret" : pathname.startsWith("/secret") ? "/home" : "";
 
   return (
-    <header className="relative z-20 mb-16 mt-4 flex items-center justify-between">
+    <header className="relative z-20 mb-16 mt-12 flex items-center justify-between lg:mt-4">
       <button className="ao-icon-button" aria-label="Search" onClick={() => setSearchOpen(true)}>
         <Search size={18} strokeWidth={1.8} />
       </button>

@@ -12,7 +12,7 @@
     <meta name="apple-mobile-web-app-title" content="LTravelLog">
     <meta name="theme-color" content="#e7e9e8">
 
-    <link rel="stylesheet" href="/ltravellog-route-style.css?v=0.55.22">
+    <link rel="stylesheet" href="/ltravellog-route-style.css?v=0.55.23">
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
 </head>
 <body>
