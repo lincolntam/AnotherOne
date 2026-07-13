@@ -179,7 +179,7 @@ button { cursor: pointer; }
 }
 
 .search-sheet {
-    bottom: 32px;
+    bottom: 48px;
     max-height: calc(100vh - 112px);
     overflow: auto;
     padding: 14px;
@@ -804,6 +804,10 @@ button { cursor: pointer; }
         bottom: 20px;
     }
 
+    .search-sheet {
+        bottom: 36px;
+    }
+
     .search-sheet,
     .trip-sheet {
         max-height: calc(100dvh - 120px);
@@ -832,7 +836,7 @@ button { cursor: pointer; }
 
     .search-sheet {
         left: calc(var(--desktop-left) + var(--desktop-gutter));
-        bottom: 28px;
+        bottom: 44px;
     }
 
     .trip-sheet {

@@ -885,6 +885,10 @@ function showSearch() {
 }
 
 function goHome() {
+    if (window.top && window.top !== window) {
+        window.top.location.href = "/ltravellog/categories";
+        return;
+    }
     window.location.href = "/ltravellog/categories";
 }
 

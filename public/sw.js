@@ -1,5 +1,5 @@
-const CACHE_NAME = "anotherone-v11";
-const IMAGE_CACHE = "anotherone-images-v11";
+const CACHE_NAME = "anotherone-v12";
+const IMAGE_CACHE = "anotherone-images-v12";
 const CORE_ASSETS = ["/offline.html", "/manifest.webmanifest", "/icons/icon.svg"];
 
 self.addEventListener("install", (event) => {
