@@ -85,7 +85,7 @@ select {
   }
 
   .ao-bottom-nav {
-    bottom: 2.5rem;
+    bottom: 3rem;
   }
 
   @media (display-mode: standalone), (max-width: 520px) {
@@ -99,6 +99,7 @@ select {
       overflow: hidden;
       background: #fff !important;
       overscroll-behavior: none;
+      touch-action: pan-x pan-y;
     }
 
     .ao-shell {
@@ -144,7 +145,7 @@ select {
     }
 
     .ao-bottom-nav {
-      bottom: 2.5rem;
+      bottom: 3rem;
     }
 
     .ao-phone::before {

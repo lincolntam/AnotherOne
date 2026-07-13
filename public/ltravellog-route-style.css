@@ -86,6 +86,13 @@ button { cursor: pointer; }
             linear-gradient(180deg, rgba(0, 4, 10, 0.04), rgba(7, 14, 23, 0.2) 34%, rgba(0, 2, 7, 0.74)),
             url("Tesla.jpg") center center / cover no-repeat,
             #02050a;
+        touch-action: pan-x pan-y;
+    }
+
+    .route-inputs input,
+    .compact-settings input,
+    .compact-settings select {
+        font-size: 16px;
     }
 
     .phone-shell {
@@ -172,7 +179,7 @@ button { cursor: pointer; }
 }
 
 .search-sheet {
-    bottom: 24px;
+    bottom: 32px;
     max-height: calc(100vh - 112px);
     overflow: auto;
     padding: 14px;
