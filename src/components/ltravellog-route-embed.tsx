@@ -8,7 +8,7 @@ export function LtravelLogRouteEmbed() {
       <iframe
         title="LTravelLog Route"
         src="/ltravellog-route"
-        className="block h-[100dvh] min-h-[100svh] w-full border-0 bg-white"
+        className="block h-full min-h-0 w-full border-0 bg-white"
         allow="geolocation; fullscreen"
       />
     </AppShell>
