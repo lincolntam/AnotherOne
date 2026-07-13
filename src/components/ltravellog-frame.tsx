@@ -102,7 +102,7 @@ export function LtravelLogFrame({
 
 function MobileToolList({ activeId }: { activeId?: string }) {
   return (
-    <div className="space-y-5 px-5 pb-28 pt-8 lg:hidden">
+    <div className="space-y-5 px-5 pb-8 pt-8 lg:hidden">
       {ltravelLogTools.map((tool, index) => (
         <Link key={tool.id} href={tool.url as Route} className="grid w-full grid-cols-[52px_1fr] gap-3 text-left">
           <div className="flex min-h-[116px] items-center justify-center bg-white/70">
@@ -197,7 +197,7 @@ function LeftContent({ activeId }: { activeId?: string }) {
 
 function MobileHeader({ title, subtitle, backHref }: { title: string; subtitle: string; backHref: Route }) {
   return (
-    <div className="flex items-center justify-between px-5 pt-5">
+    <div className="flex items-center justify-between px-5 pt-12">
       <Link href={backHref} className="inline-flex h-12 w-12 items-center justify-center rounded-full bg-white/55 text-ink shadow-[0_12px_28px_rgba(34,34,34,0.08)] backdrop-blur" aria-label="Back">
         <ArrowLeft size={19} />
       </Link>

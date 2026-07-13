@@ -27,7 +27,7 @@ export default function AnotherInPage() {
   return (
     <AppShell showHeader={false} showBottomNav={false}>
       <main className="flex min-h-[100dvh] items-center justify-center bg-white px-6 text-center">
-        <Link href={"/secret/categories" as Route} className="absolute left-6 top-8 inline-flex h-10 w-10 items-center justify-center rounded-full text-ink transition hover:bg-paper" aria-label="Back">
+        <Link href={"/secret/categories" as Route} className="absolute left-6 top-14 inline-flex h-10 w-10 items-center justify-center rounded-full text-ink transition hover:bg-paper lg:top-8" aria-label="Back">
           <ArrowLeft size={18} />
         </Link>
         <section className="max-w-sm">

@@ -123,7 +123,7 @@ export default function AnotherWMDetailPage() {
         <section className="bg-white lg:min-h-[100dvh] lg:overflow-y-auto lg:px-12 lg:py-7 xl:px-20">
           <div className="relative h-[260px] w-full overflow-hidden bg-paper lg:mx-auto lg:h-[430px] lg:max-w-[640px] lg:rounded-[5px] lg:shadow-[0_18px_46px_rgba(34,34,34,0.1)]">
             <ExternalCoverImage src={item.coverUrl} />
-            <Link href="/secret/anotherwm/list" aria-label="Back" className="absolute left-4 top-5 inline-flex h-10 w-10 items-center justify-center rounded-full bg-white/90 text-ink shadow-sm backdrop-blur lg:hidden">
+            <Link href="/secret/anotherwm/list" aria-label="Back" className="absolute left-4 top-14 inline-flex h-10 w-10 items-center justify-center rounded-full bg-white/90 text-ink shadow-sm backdrop-blur lg:hidden">
               <ArrowLeft size={18} />
             </Link>
           </div>

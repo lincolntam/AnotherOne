@@ -8,7 +8,7 @@ import type { WebsiteShortcut } from "@/types/app";
 
 export function JournalHeader({ backHref }: { backHref: Route }) {
   return (
-    <div className="mb-7 mt-3 flex items-center justify-center">
+    <div className="mb-7 mt-12 flex items-center justify-center lg:mt-3">
       <Link href={backHref} className="absolute left-5 inline-flex h-10 w-10 items-center justify-center rounded-full text-ink" aria-label="Back">
         <ArrowLeft size={18} />
       </Link>

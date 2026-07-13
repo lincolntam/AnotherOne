@@ -57,7 +57,7 @@ select {
     min-height: calc(100dvh - 1.5rem);
     min-height: calc(100svh - 1.5rem);
     max-height: 932px;
-    @apply relative w-full overflow-x-hidden rounded-[34px] bg-white px-5 pb-24 pt-5 shadow-journal;
+    @apply relative w-full overflow-x-hidden rounded-[34px] bg-white px-5 pb-0 pt-5 shadow-journal;
   }
 
   @media (display-mode: standalone), (max-width: 520px) {
@@ -75,7 +75,7 @@ select {
       min-height: 100svh;
       @apply max-h-none max-w-none rounded-none shadow-none;
       padding-top: 0;
-      padding-bottom: 6rem;
+      padding-bottom: 0;
     }
 
     .ao-phone.ao-phone-full {
@@ -101,7 +101,7 @@ select {
     .ao-phone {
       min-height: 100dvh;
       max-height: none;
-      @apply w-[780px] max-w-[48vw] overflow-y-auto rounded-none border-r border-black/[0.05] px-8 pb-24 pt-7 shadow-none;
+      @apply w-[780px] max-w-[48vw] overflow-y-auto rounded-none border-r border-black/[0.05] px-8 pb-0 pt-7 shadow-none;
     }
 
     .ao-phone.ao-phone-full {
