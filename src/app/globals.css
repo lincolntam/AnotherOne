@@ -74,6 +74,11 @@ select {
     padding: 0;
   }
 
+  .ao-bottom-nav,
+  .ao-install-prompt {
+    bottom: 0;
+  }
+
   @media (display-mode: standalone), (max-width: 520px) {
     html,
     body {
@@ -112,6 +117,11 @@ select {
       padding: 0;
     }
 
+    .ao-bottom-nav,
+    .ao-install-prompt {
+      bottom: max(8px, var(--ao-safe-bottom));
+    }
+
     .ao-phone::before {
       display: none;
     }
@@ -120,6 +130,49 @@ select {
   .ao-phone::before {
     content: "";
     @apply pointer-events-none absolute left-1/2 top-3 h-1.5 w-20 -translate-x-1/2 rounded-full bg-black/5;
+  }
+
+  @media (min-width: 521px) and (max-width: 899px) {
+    html,
+    body {
+      min-height: 100%;
+      overflow-x: hidden;
+      background: #fff;
+    }
+
+    .ao-shell {
+      width: 100%;
+      height: 100dvh;
+      min-height: 0;
+      max-width: none;
+      align-items: stretch;
+      justify-content: flex-start;
+      overflow: hidden;
+      @apply bg-white px-0 py-0;
+    }
+
+    .ao-phone {
+      width: 100%;
+      height: 100dvh;
+      min-height: 0;
+      max-height: none;
+      overflow-y: auto;
+      overscroll-behavior: none;
+      -webkit-overflow-scrolling: touch;
+      @apply max-w-none rounded-none border-0 shadow-none;
+    }
+
+    .ao-phone.ao-phone-full {
+      width: 100%;
+      height: 100%;
+      min-height: 0;
+      max-width: none;
+      padding: 0;
+    }
+
+    .ao-phone::before {
+      display: none;
+    }
   }
 
   @media (min-width: 900px) {

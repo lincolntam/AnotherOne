@@ -26,7 +26,7 @@ export function InstallPrompt() {
 
   return (
     <button
-      className="fixed bottom-0 left-1/2 z-50 inline-flex -translate-x-1/2 items-center gap-2 rounded-full bg-ink px-4 py-3 text-sm font-semibold text-white shadow-journal"
+      className="ao-install-prompt fixed bottom-0 left-1/2 z-50 inline-flex -translate-x-1/2 items-center gap-2 rounded-full bg-ink px-4 py-3 text-sm font-semibold text-white shadow-journal"
       onClick={async () => {
         await event.prompt();
         setVisible(false);
