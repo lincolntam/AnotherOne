@@ -255,7 +255,7 @@ export function LtravelLogTripPlanner() {
       mobileTitle="LTravelLog"
       mobileSubtitle="Trip Planner"
       right={
-        <section className="relative flex min-h-[100svh] flex-col justify-end overflow-hidden bg-[#dfe8e6] px-4 pb-4 pt-0 lg:px-0 lg:pb-0 lg:pt-0">
+        <section className="relative flex h-full min-h-0 flex-col justify-end overflow-hidden bg-[#dfe8e6] px-4 pb-4 pt-0 lg:px-0 lg:pb-0 lg:pt-0">
           <div ref={mapRef} className="absolute inset-0" />
           {!mapsReady ? <FallbackMap /> : null}
           <div className="pointer-events-none absolute left-8 top-8 hidden rounded-full bg-white/45 px-4 py-2 text-xs font-black text-white shadow-sm backdrop-blur lg:block">

@@ -65,8 +65,8 @@ export default function PasscodePage() {
   }
 
   return (
-    <main className="min-h-[100dvh] bg-white text-ink">
-      <section className="mx-auto flex min-h-[100dvh] w-full max-w-md flex-col px-7 py-10">
+    <main className="ao-viewport-page bg-white text-ink">
+      <section className="mx-auto flex min-h-full w-full max-w-md flex-col px-7 py-10">
         <div className="flex flex-1 flex-col justify-end pb-8">
           <div className="relative mx-auto mb-7 h-44 w-56">
             <Image src="/assets/passcode-door.png" alt="Unlock illustration" fill className="object-contain" priority />

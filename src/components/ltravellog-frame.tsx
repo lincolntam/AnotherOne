@@ -79,12 +79,12 @@ export function LtravelLogFrame({
 }) {
   return (
     <AppShell websites={ltravelLogTools} showHeader={false} showBottomNav={false}>
-      <main className="relative min-h-[100svh] overflow-hidden bg-white lg:grid lg:grid-cols-[minmax(420px,min(780px,48vw))_minmax(0,1fr)]">
+      <main className="relative h-full min-h-0 overflow-hidden bg-white lg:grid lg:grid-cols-[minmax(420px,min(780px,48vw))_minmax(0,1fr)]">
         <aside className="relative z-20 hidden h-screen overflow-y-auto border-r border-black/[0.05] bg-white px-10 py-10 lg:block">
           <LeftContent activeId={activeId} />
         </aside>
 
-        <section className="relative min-h-[100svh] bg-white">
+        <section className="relative h-full min-h-0 bg-white">
           {showMap ? <LtravelLogMapBackground /> : null}
           <div className={`relative z-10 lg:hidden ${hideMobileHeader ? "hidden" : ""}`}>
             <MobileHeader

@@ -6,6 +6,8 @@
   color-scheme: light;
   background: #fff;
   color: #252525;
+  --ao-viewport-bottom: env(safe-area-inset-bottom, 0px);
+  --ao-viewport-height: calc(100dvh + var(--ao-viewport-bottom));
 }
 
 .dark {
@@ -50,8 +52,9 @@ select {
 }
 
 @layer components {
-  :root {
-    --ao-viewport-bottom: env(safe-area-inset-bottom, 0px);
+  .ao-viewport-page {
+    width: 100%;
+    min-height: 100dvh;
   }
 
   .ao-shell {
@@ -84,8 +87,10 @@ select {
   @media (display-mode: standalone), (max-width: 520px) {
     html,
     body {
-      height: calc(100dvh + var(--ao-viewport-bottom));
-      min-height: calc(100dvh + var(--ao-viewport-bottom));
+      width: 100dvw;
+      max-width: 100dvw;
+      height: var(--ao-viewport-height);
+      min-height: var(--ao-viewport-height);
       max-height: none;
       overflow: hidden;
       background: #fff !important;
@@ -93,14 +98,23 @@ select {
     }
 
     .ao-shell {
-      width: 100%;
-      height: calc(100dvh + var(--ao-viewport-bottom));
+      width: 100dvw;
+      height: var(--ao-viewport-height);
       min-height: 0;
       max-height: none;
       margin-top: 0;
       margin-bottom: calc(-1 * var(--ao-viewport-bottom));
       overflow: hidden;
       @apply max-w-none bg-white px-0 py-0;
+    }
+
+    .ao-viewport-page {
+      width: 100dvw;
+      height: var(--ao-viewport-height);
+      min-height: var(--ao-viewport-height);
+      overflow-y: auto;
+      overscroll-behavior: none;
+      -webkit-overflow-scrolling: touch;
     }
 
     .ao-phone {

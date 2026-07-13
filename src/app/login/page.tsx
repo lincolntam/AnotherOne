@@ -22,7 +22,7 @@ export default function LoginPage() {
   }
 
   return (
-    <main className="flex min-h-[100dvh] items-center justify-center px-5 py-10">
+    <main className="ao-viewport-page flex items-center justify-center px-5 py-10">
       <motion.form
         className="ao-card w-full max-w-md p-6"
         initial={{ opacity: 0, y: 18 }}
