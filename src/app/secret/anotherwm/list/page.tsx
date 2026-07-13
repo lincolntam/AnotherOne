@@ -87,7 +87,7 @@ function AnotherWMListContent() {
 function matchesFilter(item: WatchlistItem, filters: { actressFilter: string; genreFilter: string; statusFilter: string; urlFilter: string }) {
   if (filters.actressFilter) return item.actresses.some((person) => sameTag(person.name, filters.actressFilter) || sameTag(person.url || "", filters.urlFilter));
   if (filters.genreFilter) return item.genres.some((genre) => sameTag(genre.name, filters.genreFilter) || sameTag(genre.url || "", filters.urlFilter));
-  if (filters.statusFilter) return sameTag(item.status || "Pending", filters.statusFilter);
+  if (filters.statusFilter) return (item.statuses?.length ? item.statuses : [item.status || "Pending"]).some((status) => sameTag(status, filters.statusFilter));
   return true;
 }
 

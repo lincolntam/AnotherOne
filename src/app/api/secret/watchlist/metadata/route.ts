@@ -54,6 +54,7 @@ export async function POST(request: Request) {
         genres: uniqueByName(extractLabelLinks<WatchlistGenre>(html, genreLabel, parsed)),
         releaseDate: extractReleaseDate(html),
         status: "Pending",
+        statuses: ["Pending"],
         savedAt: new Date().toISOString()
       };
 
@@ -96,6 +97,7 @@ function createFallbackItem(sourceUrl: string, site: WatchlistItem["site"]): Wat
     genres: [],
     releaseDate: "",
     status: "Pending",
+    statuses: ["Pending"],
     savedAt: new Date().toISOString()
   };
 }
@@ -127,7 +129,8 @@ async function enrichMissingMetadata(item: WatchlistItem, currentUrl: string): P
       genres: item.genres.length ? item.genres : extra.genres,
       releaseDate: item.releaseDate || extra.releaseDate,
       previewUrl: item.previewUrl || extra.previewUrl,
-      status: item.status || extra.status
+      status: item.status || extra.status,
+      statuses: item.statuses?.length ? item.statuses : extra.statuses
     };
 
     if (hasCoreMetadata(merged)) return merged;

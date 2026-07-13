@@ -13,6 +13,7 @@ import { isDirtyWatchlistItem } from "@/utils/watchlist-sanitize";
 
 const actressTitle = "Actress";
 const genreTitle = "Genre";
+const statusOptions: WatchlistStatus[] = ["Pending", "Watched", "Listed", "Again"];
 
 export default function AnotherWMDetailPage() {
   const params = useParams<{ id: string }>();
@@ -151,15 +152,18 @@ export default function AnotherWMDetailPage() {
             </MetaSection>
 
             <MetaSection icon={<Tag size={16} />} title="Tag">
-              {(["Pending", "Watched", "Again"] as WatchlistStatus[]).map((status) => (
+              {statusOptions.map((status) => {
+                const active = getItemStatuses(item).includes(status);
+                return (
                 <button
                   key={status}
-                  className={`rounded-full px-3 py-2 text-xs font-semibold transition ${item.status === status ? "bg-ink text-white" : "bg-paper text-ink hover:bg-mist"}`}
+                  className={`rounded-full px-3 py-2 text-xs font-semibold transition ${active ? "bg-ink text-white" : "bg-paper text-ink hover:bg-mist"}`}
                   onClick={() => updateStatus(status)}
                 >
                   {status}
                 </button>
-              ))}
+                );
+              })}
             </MetaSection>
 
             <button className="w-full rounded-full bg-ink px-5 py-3 text-sm font-semibold text-white shadow-[0_14px_28px_rgba(0,0,0,0.16)]" onClick={() => window.open(item.sourceUrl, "_blank", "noopener,noreferrer")}>
@@ -212,7 +216,8 @@ export default function AnotherWMDetailPage() {
 
   function updateStatus(status: WatchlistStatus) {
     if (!item) return;
-    const next = { ...item, status };
+    const statuses = toggleStatus(getItemStatuses(item), status);
+    const next = { ...item, status: statuses[0], statuses };
     setItem(next);
     setItems((current) => current.map((entry) => (entry.id === next.id ? next : entry)));
     api<WatchlistItem>("/api/secret/watchlist", {
@@ -257,6 +262,17 @@ export default function AnotherWMDetailPage() {
       })
       .catch(() => undefined);
   }
+}
+
+function getItemStatuses(item: WatchlistItem) {
+  return item.statuses?.length ? item.statuses : [item.status || "Pending"];
+}
+
+function toggleStatus(current: WatchlistStatus[], status: WatchlistStatus): WatchlistStatus[] {
+  if (status === "Pending") return ["Pending"];
+  const active = current.filter((value) => value !== "Pending");
+  const next = active.includes(status) ? active.filter((value) => value !== status) : [...active, status];
+  return next.length ? next : ["Pending"];
 }
 
 function createSourceUrl(id: string) {

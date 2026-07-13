@@ -8,7 +8,7 @@ export type WatchlistGenre = {
   url?: string;
 };
 
-export type WatchlistStatus = "Pending" | "Watched" | "Again";
+export type WatchlistStatus = "Pending" | "Watched" | "Listed" | "Again";
 
 export type WatchlistItem = {
   id: string;
@@ -22,5 +22,6 @@ export type WatchlistItem = {
   genres: WatchlistGenre[];
   releaseDate: string;
   status: WatchlistStatus;
+  statuses?: WatchlistStatus[];
   savedAt: string;
 };

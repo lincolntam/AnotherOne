@@ -19,6 +19,8 @@ type TagEntry = {
   count: number;
 };
 
+const statusOptions: WatchlistStatus[] = ["Pending", "Watched", "Listed", "Again"];
+
 export default function AnotherWMTagsPage() {
   return (
     <Suspense fallback={null}>
@@ -83,8 +85,8 @@ function collectTags(items: WatchlistItem[], type: TagType) {
   const map = new Map<string, TagEntry>();
 
   if (type === "status") {
-    (["Pending", "Watched", "Again"] as WatchlistStatus[]).forEach((status) => {
-      map.set(status, { name: status, count: items.filter((item) => (item.status || "Pending") === status).length });
+    statusOptions.forEach((status) => {
+      map.set(status, { name: status, count: items.filter((item) => getItemStatuses(item).includes(status)).length });
     });
     return [...map.values()];
   }
@@ -101,6 +103,10 @@ function collectTags(items: WatchlistItem[], type: TagType) {
   });
 
   return [...map.values()].sort((a, b) => b.count - a.count || a.name.localeCompare(b.name));
+}
+
+function getItemStatuses(item: WatchlistItem) {
+  return item.statuses?.length ? item.statuses : [item.status || "Pending"];
 }
 
 function normalizeTagName(value: string) {

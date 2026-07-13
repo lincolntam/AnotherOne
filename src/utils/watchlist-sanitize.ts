@@ -1,4 +1,4 @@
-import type { WatchlistGenre, WatchlistItem, WatchlistPerson } from "@/types/watchlist";
+import type { WatchlistGenre, WatchlistItem, WatchlistPerson, WatchlistStatus } from "@/types/watchlist";
 
 type WatchlistLink = WatchlistPerson | WatchlistGenre;
 
@@ -19,6 +19,7 @@ export function normalizeWatchlistItem(item: WatchlistItem): WatchlistItem {
     genres: sanitizeGenres(item.genres),
     releaseDate: cleanReleaseDate(item.releaseDate),
     status: normalizeStatus(item.status),
+    statuses: normalizeStatuses(item.statuses, item.status),
     savedAt: cleanText(item.savedAt)
   };
 }
@@ -50,8 +51,17 @@ export function normalizeCode(value: string) {
   return cleanText(value).replace(/[_\s]+/gu, "-").toUpperCase();
 }
 
-function normalizeStatus(value: string | undefined) {
-  return value === "Watched" || value === "Again" ? value : "Pending";
+function normalizeStatus(value: string | undefined): WatchlistStatus {
+  return value === "Watched" || value === "Listed" || value === "Again" ? value : "Pending";
+}
+
+function normalizeStatuses(values: WatchlistStatus[] | undefined, fallback: string | undefined): WatchlistStatus[] {
+  const allowed = new Set<WatchlistStatus>(["Pending", "Watched", "Listed", "Again"]);
+  const clean = Array.isArray(values) ? values.filter((value): value is WatchlistStatus => allowed.has(value)) : [];
+  const unique = [...new Set(clean)];
+  if (!unique.length) return [normalizeStatus(fallback)];
+  if (unique.includes("Pending") && unique.length > 1) return unique.filter((value) => value !== "Pending");
+  return unique;
 }
 
 function sanitizeLinks<T extends WatchlistLink>(items: T[] | undefined, options: { requiredPaths: string[]; maxItems: number }) {

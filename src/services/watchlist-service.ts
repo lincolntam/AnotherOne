@@ -1,6 +1,6 @@
 import { createId, getAppDb, nowIso } from "@/lib/d1";
 import type { AppUser } from "@/types/app";
-import type { WatchlistGenre, WatchlistItem, WatchlistPerson } from "@/types/watchlist";
+import type { WatchlistGenre, WatchlistItem, WatchlistPerson, WatchlistStatus } from "@/types/watchlist";
 import { normalizeWatchlistItem as normalizeWatchlistPayload } from "@/utils/watchlist-sanitize";
 
 type WatchlistRow = {
@@ -15,6 +15,7 @@ type WatchlistRow = {
   genres_json: string;
   release_date: string;
   status: WatchlistItem["status"];
+  statuses_json?: string;
   saved_at: string;
 };
 
@@ -24,7 +25,7 @@ export async function listWatchlistItems(user: AppUser) {
   await ensureWatchlistSchema();
   const rows = await getAppDb()
     .prepare(
-      `select id, source_url, site, title, code, cover_url, preview_url, actresses_json, genres_json, release_date, status, saved_at
+      `select id, source_url, site, title, code, cover_url, preview_url, actresses_json, genres_json, release_date, status, statuses_json, saved_at
        from anotherwm_watchlist_items
        where user_id = ?
        order by saved_at desc`
@@ -44,8 +45,8 @@ export async function saveWatchlistItem(user: AppUser, item: WatchlistItem) {
   await getAppDb()
     .prepare(
       `insert into anotherwm_watchlist_items
-        (id, user_id, source_url, site, title, code, cover_url, preview_url, actresses_json, genres_json, release_date, status, saved_at, updated_at)
-       values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        (id, user_id, source_url, site, title, code, cover_url, preview_url, actresses_json, genres_json, release_date, status, statuses_json, saved_at, updated_at)
+       values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
       on conflict(user_id, source_url) do update set
         id = excluded.id,
         site = excluded.site,
@@ -57,6 +58,7 @@ export async function saveWatchlistItem(user: AppUser, item: WatchlistItem) {
         genres_json = excluded.genres_json,
         release_date = excluded.release_date,
         status = excluded.status,
+        statuses_json = excluded.statuses_json,
         updated_at = excluded.updated_at`
     )
     .bind(
@@ -72,6 +74,7 @@ export async function saveWatchlistItem(user: AppUser, item: WatchlistItem) {
       JSON.stringify(normalized.genres),
       normalized.releaseDate,
       normalized.status,
+      JSON.stringify(normalized.statuses || [normalized.status]),
       savedAt,
       nowIso()
     )
@@ -108,7 +111,8 @@ function toWatchlistItem(row: WatchlistRow): WatchlistItem {
     actresses: parseLinks<WatchlistPerson>(row.actresses_json),
     genres: parseLinks<WatchlistGenre>(row.genres_json),
     releaseDate: row.release_date,
-    status: row.status === "Watched" || row.status === "Again" ? row.status : "Pending",
+    status: normalizeStatus(row.status),
+    statuses: parseStatuses(row.statuses_json, row.status),
     savedAt: row.saved_at
   };
 }
@@ -128,5 +132,25 @@ async function ensureWatchlistSchema() {
     .prepare("alter table anotherwm_watchlist_items add column status text not null default 'Pending'")
     .run()
     .catch(() => undefined);
+  await getAppDb()
+    .prepare("alter table anotherwm_watchlist_items add column statuses_json text not null default '[\"Pending\"]'")
+    .run()
+    .catch(() => undefined);
   schemaReady = true;
+}
+
+function normalizeStatus(value: string | undefined): WatchlistStatus {
+  return value === "Watched" || value === "Listed" || value === "Again" ? value : "Pending";
+}
+
+function parseStatuses(value: string | undefined, fallback: string | undefined) {
+  try {
+    const parsed = JSON.parse(value || "[]") as string[];
+    const statuses = parsed.map(normalizeStatus).filter(Boolean);
+    const unique = [...new Set(statuses)];
+    if (unique.length) return unique;
+  } catch {
+    // Fall through to single-status compatibility.
+  }
+  return [normalizeStatus(fallback)];
 }

@@ -56,7 +56,7 @@ export const anotherWMShortcuts: WebsiteShortcut[] = [
     id: "anotherwm-status",
     userId: "secret",
     title: "Tag",
-    description: "Browse Pending, Watched and Again.",
+    description: "Browse Pending, Watched, Listed and Again.",
     url: "/secret/anotherwm/tags?type=status",
     imageUrl: "",
     category: "Tags",
