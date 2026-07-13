@@ -6,13 +6,13 @@ import Image from "next/image";
 import Link from "next/link";
 import type { WebsiteShortcut } from "@/types/app";
 
-export function JournalHeader({ backHref }: { backHref: Route }) {
+export function JournalHeader({ backHref, title = "AnotherOne" }: { backHref: Route; title?: string }) {
   return (
-    <div className="mb-7 mt-12 flex items-center justify-center lg:mt-3">
+    <div className="mb-7 mt-16 flex items-center justify-center lg:mt-3">
       <Link href={backHref} className="absolute left-5 inline-flex h-10 w-10 items-center justify-center rounded-full text-ink" aria-label="Back">
         <ArrowLeft size={18} />
       </Link>
-      <h1 className="text-[11px] font-bold uppercase tracking-[0.18em] text-ink">AnotherOne</h1>
+      <h1 className="text-[11px] font-bold uppercase tracking-[0.18em] text-ink">{title}</h1>
     </div>
   );
 }

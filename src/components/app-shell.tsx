@@ -28,7 +28,6 @@ export function AppShell({ children, websites = [], showBottomNav = true, showHe
   const requiresAuth = isProtectedPath(pathname);
   const fullScreen = pathname.startsWith("/secret/anotherwm/list/") ||
     pathname.startsWith("/secret/anotherin") ||
-    pathname.startsWith("/ltravellog/categories") ||
     pathname.startsWith("/ltravellog/trip-planner") ||
     pathname.startsWith("/ltravellog/charging") ||
     pathname.startsWith("/ltravellog/tunnel-fee");

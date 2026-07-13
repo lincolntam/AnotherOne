@@ -38,7 +38,7 @@ export function BottomNav() {
   }
 
   return (
-    <nav className="ao-bottom-nav absolute bottom-0 left-0 right-0 z-40 flex items-center justify-center">
+    <nav className="ao-bottom-nav absolute left-0 right-0 z-40 flex items-center justify-center">
       <div className="flex w-full items-center justify-between px-8">
         <div className="flex h-11 min-w-[148px] items-center gap-2 rounded-full border border-black/[0.04] bg-white px-4 text-[10px] font-bold uppercase leading-tight text-graphite/70 shadow-[0_12px_28px_rgba(34,34,34,0.08)]">
           <CloudSun size={21} strokeWidth={1.7} />

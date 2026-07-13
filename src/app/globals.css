@@ -84,6 +84,10 @@ select {
     bottom: 0;
   }
 
+  .ao-bottom-nav {
+    bottom: 1.5rem;
+  }
+
   @media (display-mode: standalone), (max-width: 520px) {
     html,
     body {
@@ -137,6 +141,10 @@ select {
     .ao-bottom-nav,
     .ao-install-prompt {
       bottom: 0;
+    }
+
+    .ao-bottom-nav {
+      bottom: 1.5rem;
     }
 
     .ao-phone::before {
