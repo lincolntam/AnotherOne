@@ -85,7 +85,7 @@ select {
   }
 
   .ao-bottom-nav {
-    bottom: 3rem;
+    bottom: 4rem;
   }
 
   @media (display-mode: standalone), (max-width: 520px) {
@@ -145,7 +145,7 @@ select {
     }
 
     .ao-bottom-nav {
-      bottom: 3rem;
+      bottom: 4rem;
     }
 
     .ao-phone::before {
