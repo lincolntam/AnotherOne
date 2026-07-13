@@ -25,7 +25,11 @@ export function Header({ onOpenSetting }: HeaderProps) {
       : pathname.startsWith("/ltravellog")
         ? "/ltravellog/categories"
         : "/categories";
-  const secretExitHref = pathname.startsWith("/secret/anotherwm") ? "/secret" : pathname.startsWith("/secret") ? "/home" : "";
+  const exitHref = pathname.startsWith("/secret/anotherwm")
+    ? "/secret"
+    : pathname.startsWith("/secret") || pathname.startsWith("/ltravellog")
+      ? "/home"
+      : "";
 
   return (
     <header className="relative z-20 mb-16 mt-12 flex items-center justify-between lg:mt-4">
@@ -52,8 +56,8 @@ export function Header({ onOpenSetting }: HeaderProps) {
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: -8, scale: 0.98 }}
           >
-            {secretExitHref ? (
-              <Link className="flex items-center gap-3 rounded-2xl px-3 py-3 text-sm hover:bg-mist/70" href={secretExitHref}>
+            {exitHref ? (
+              <Link className="flex items-center gap-3 rounded-2xl px-3 py-3 text-sm hover:bg-mist/70" href={exitHref}>
                 <ArrowLeft size={17} />
                 Exit
               </Link>
