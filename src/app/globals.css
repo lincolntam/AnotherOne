@@ -6,8 +6,6 @@
   color-scheme: light;
   background: #fff;
   color: #252525;
-  --ao-safe-top: env(safe-area-inset-top, 0px);
-  --ao-safe-bottom: env(safe-area-inset-bottom, 0px);
 }
 
 .dark {
@@ -82,7 +80,7 @@ select {
   @media (display-mode: standalone), (max-width: 520px) {
     html,
     body {
-      height: calc(100dvh + var(--ao-safe-top) + var(--ao-safe-bottom));
+      height: 100dvh;
       min-height: 0;
       max-height: none;
       overflow: hidden;
@@ -92,10 +90,10 @@ select {
 
     .ao-shell {
       width: 100%;
-      height: calc(100dvh + var(--ao-safe-top) + var(--ao-safe-bottom));
+      height: 100dvh;
       min-height: 0;
       max-height: none;
-      margin-top: calc(-1 * var(--ao-safe-top));
+      margin-top: 0;
       overflow: hidden;
       @apply max-w-none bg-white px-0 py-0;
     }
@@ -119,7 +117,7 @@ select {
 
     .ao-bottom-nav,
     .ao-install-prompt {
-      bottom: max(8px, var(--ao-safe-bottom));
+      bottom: 8px;
     }
 
     .ao-phone::before {
