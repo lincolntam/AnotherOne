@@ -26,7 +26,7 @@ export function InstallPrompt() {
 
   return (
     <button
-      className="fixed bottom-8 left-1/2 z-50 inline-flex -translate-x-1/2 items-center gap-2 rounded-full bg-ink px-4 py-3 text-sm font-semibold text-white shadow-journal"
+      className="fixed bottom-2 left-1/2 z-50 inline-flex -translate-x-1/2 items-center gap-2 rounded-full bg-ink px-4 py-3 text-sm font-semibold text-white shadow-journal"
       onClick={async () => {
         await event.prompt();
         setVisible(false);

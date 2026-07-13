@@ -346,6 +346,13 @@ button { cursor: pointer; }
 .compact-settings select,
 .compact-settings select option {
     color: #151515;
+}
+
+.compact-settings select {
+    background: rgba(255,255,255,0.38);
+}
+
+.compact-settings select option {
     background: #ffffff;
 }
 

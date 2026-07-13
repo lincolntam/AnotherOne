@@ -4,7 +4,7 @@
 
 :root {
   color-scheme: light;
-  background: #f8f7f4;
+  background: #fff;
   color: #252525;
 }
 
@@ -21,6 +21,7 @@
 html {
   min-height: 100%;
   overflow-x: hidden;
+  background: #fff;
 }
 
 body {
@@ -63,10 +64,12 @@ select {
   @media (display-mode: standalone), (max-width: 520px) {
     html,
     body {
-      background: #fff;
+      min-height: 100dvh;
+      background: #fff !important;
     }
 
     .ao-shell {
+      min-height: 100dvh;
       @apply max-w-none bg-white px-0 py-0;
     }
 
