@@ -39,7 +39,7 @@ export function HomeCarousel({ websites, onOpen }: HomeCarouselProps) {
 
   return (
     <section className="mb-8">
-      <motion.div className="-mx-5 flex snap-x gap-5 overflow-x-auto px-5 pb-5 pt-1 [scrollbar-width:none] md:-mx-7 md:px-7 lg:gap-7 [&::-webkit-scrollbar]:hidden" layout>
+      <motion.div className="-mx-5 flex snap-x gap-5 overflow-x-auto overflow-y-hidden px-5 pb-5 pt-1 [scrollbar-width:none] md:-mx-7 md:px-7 lg:gap-7 [&::-webkit-scrollbar]:hidden" layout>
         {imageDisplay.length
           ? [
               ...imageDisplay.map((image) => (
