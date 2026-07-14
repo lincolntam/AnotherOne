@@ -10,6 +10,10 @@ let waypointId = 0;
 let selectedOutboundTunnels = ["auto"];
 let selectedReturnTunnels = ["auto"];
 
+const isStandalone = window.matchMedia("(display-mode: standalone)").matches
+    || window.navigator.standalone === true;
+document.documentElement.dataset.standalone = String(isStandalone);
+
 const FUEL_CAR_COST_PER_KM = 2.25;
 const TUNNEL_DETECTION_RADIUS_M = 420;
 const TUNNEL_DATA = [

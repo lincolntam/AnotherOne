@@ -7,6 +7,17 @@
     --panel: rgba(88, 94, 101, 0.84);
     --shadow: 0 24px 58px rgba(21, 26, 34, 0.28);
     --route-viewport-bottom: env(safe-area-inset-bottom, 0px);
+    --pwa-search-lift: 0px;
+}
+
+@media (display-mode: standalone) {
+    :root {
+        --pwa-search-lift: 16px;
+    }
+}
+
+html[data-standalone="true"] {
+    --pwa-search-lift: 16px;
 }
 
 * { box-sizing: border-box; }
@@ -179,7 +190,7 @@ button { cursor: pointer; }
 }
 
 .search-sheet {
-    bottom: 48px;
+    bottom: calc(48px + var(--pwa-search-lift));
     max-height: calc(100vh - 112px);
     overflow: auto;
     padding: 14px;
@@ -805,7 +816,7 @@ button { cursor: pointer; }
     }
 
     .search-sheet {
-        bottom: 36px;
+        bottom: calc(36px + var(--pwa-search-lift));
     }
 
     .search-sheet,
@@ -836,7 +847,7 @@ button { cursor: pointer; }
 
     .search-sheet {
         left: calc(var(--desktop-left) + var(--desktop-gutter));
-        bottom: 44px;
+        bottom: calc(44px + var(--pwa-search-lift));
     }
 
     .trip-sheet {
