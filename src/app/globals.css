@@ -47,6 +47,20 @@ select {
   font: inherit;
 }
 
+input[type="datetime-local"] {
+  display: block;
+  box-sizing: border-box;
+  min-width: 0;
+  max-width: 100%;
+  -webkit-appearance: none;
+  appearance: none;
+}
+
+input[type="datetime-local"]::-webkit-date-and-time-value {
+  min-width: 0;
+  text-align: left;
+}
+
 .dark body {
   background: linear-gradient(180deg, #181817 0%, #242320 100%);
 }
@@ -77,6 +91,13 @@ select {
     min-height: 0;
     max-height: none;
     padding: 0;
+  }
+
+  .ao-phone.ao-phone-page-scroll {
+    overflow-x: hidden;
+    overflow-y: auto;
+    overscroll-behavior-y: contain;
+    -webkit-overflow-scrolling: touch;
   }
 
   .ao-bottom-nav,

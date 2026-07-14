@@ -67,7 +67,8 @@ export function LtravelLogFrame({
   right,
   children,
   showMap = false,
-  hideMobileHeader = false
+  hideMobileHeader = false,
+  pageScrollable = false
 }: {
   activeId?: string;
   mobileTitle?: string;
@@ -76,15 +77,16 @@ export function LtravelLogFrame({
   children?: React.ReactNode;
   showMap?: boolean;
   hideMobileHeader?: boolean;
+  pageScrollable?: boolean;
 }) {
   return (
     <AppShell websites={ltravelLogTools} showHeader={false} showBottomNav={false}>
-      <main className="relative h-full min-h-0 overflow-hidden bg-white lg:grid lg:grid-cols-[minmax(420px,min(780px,48vw))_minmax(0,1fr)]">
+      <main className={`relative bg-white lg:grid lg:h-full lg:min-h-0 lg:grid-cols-[minmax(420px,min(780px,48vw))_minmax(0,1fr)] lg:overflow-hidden ${pageScrollable ? "min-h-full" : "h-full min-h-0 overflow-hidden"}`}>
         <aside className="relative z-20 hidden h-screen overflow-y-auto border-r border-black/[0.05] bg-white px-10 py-10 lg:block">
           <LeftContent activeId={activeId} />
         </aside>
 
-        <section className="relative flex h-full min-h-0 flex-col bg-white">
+        <section className={`relative flex flex-col bg-white lg:h-full lg:min-h-0 ${pageScrollable ? "min-h-full" : "h-full min-h-0"}`}>
           {showMap ? <LtravelLogMapBackground /> : null}
           <div className={`relative z-10 shrink-0 lg:hidden ${hideMobileHeader ? "hidden" : ""}`}>
             <MobileHeader
@@ -93,7 +95,7 @@ export function LtravelLogFrame({
               backHref={activeId ? "/ltravellog/categories" : "/ltravellog"}
             />
           </div>
-          <div className="relative z-10 min-h-0 flex-1">{right ?? children ?? <MobileToolList activeId={activeId} />}</div>
+          <div className={`relative z-10 flex-1 lg:min-h-0 ${pageScrollable ? "min-h-full" : "min-h-0"}`}>{right ?? children ?? <MobileToolList activeId={activeId} />}</div>
         </section>
       </main>
     </AppShell>

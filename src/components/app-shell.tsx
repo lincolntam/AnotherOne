@@ -31,6 +31,8 @@ export function AppShell({ children, websites = [], showBottomNav = true, showHe
     pathname.startsWith("/ltravellog/trip-planner") ||
     pathname.startsWith("/ltravellog/charging") ||
     pathname.startsWith("/ltravellog/tunnel-fee");
+  const pageScrollable = pathname.startsWith("/ltravellog/charging") ||
+    pathname.startsWith("/ltravellog/tunnel-fee");
   const drawKey = getImageDrawKey(pathname);
 
   useEffect(() => {
@@ -81,11 +83,13 @@ export function AppShell({ children, websites = [], showBottomNav = true, showHe
 
   return (
     <main className="ao-shell">
-      <section className={`ao-phone ${fullScreen ? "ao-phone-full" : ""}`}>
+      <section className={`ao-phone ${fullScreen ? "ao-phone-full" : ""} ${pageScrollable ? "ao-phone-page-scroll" : ""}`}>
         {showHeader ? <Header onOpenSetting={() => setSettingOpen(true)} /> : null}
         <motion.div
-          className={fullScreen
-            ? "flex h-full min-h-0 flex-1"
+          className={pageScrollable
+            ? "flex min-h-full w-full flex-none flex-col"
+            : fullScreen
+              ? "flex h-full min-h-0 flex-1"
             : "flex min-h-0 flex-1 flex-col overflow-y-auto overscroll-contain pb-28 [-webkit-overflow-scrolling:touch]"}
           initial={{ opacity: 0, y: 16 }}
           animate={{ opacity: 1, y: 0 }}
