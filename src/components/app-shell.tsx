@@ -84,10 +84,10 @@ export function AppShell({ children, websites = [], showBottomNav = true, showHe
   const animatedContent = (
     <motion.div
       className={pageScrollable
-        ? "flex min-h-full w-full flex-none flex-col"
+        ? "flex min-h-full w-full min-w-0 flex-none flex-col overflow-x-hidden"
         : fullScreen
-          ? "flex h-full min-h-0 flex-1"
-          : "flex min-h-0 flex-1 flex-col overflow-y-auto overscroll-contain pb-28 [-webkit-overflow-scrolling:touch]"}
+          ? "flex h-full min-h-0 min-w-0 flex-1 overflow-x-hidden"
+          : "flex min-h-0 w-full min-w-0 flex-1 flex-col overflow-x-hidden overflow-y-auto overscroll-contain pb-28 [-webkit-overflow-scrolling:touch]"}
       initial={{ opacity: 0, y: 16 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.28, ease: "easeOut" }}

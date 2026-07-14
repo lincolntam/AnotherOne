@@ -75,7 +75,7 @@ input[type="datetime-local"]::-webkit-date-and-time-value {
     height: 100dvh;
     min-height: 100dvh;
     min-height: 100svh;
-    @apply mx-auto flex w-full max-w-md items-start justify-center overflow-visible px-3 py-3;
+    @apply mx-auto flex w-full max-w-md items-start justify-center overflow-hidden px-3 py-3;
   }
 
   .ao-phone {

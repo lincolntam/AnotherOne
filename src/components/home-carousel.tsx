@@ -38,8 +38,8 @@ export function HomeCarousel({ websites, onOpen }: HomeCarouselProps) {
   }, [drawKey]);
 
   return (
-    <section className="mb-8">
-      <motion.div className="-mx-5 flex snap-x gap-5 overflow-x-auto overflow-y-hidden px-5 pb-5 pt-1 [scrollbar-width:none] md:-mx-7 md:px-7 lg:gap-7 [&::-webkit-scrollbar]:hidden" layout>
+    <section className="mb-8 w-full min-w-0 overflow-x-hidden">
+      <motion.div className="-mx-5 flex w-[calc(100%+2.5rem)] max-w-none snap-x gap-5 overflow-x-auto overflow-y-hidden px-5 pb-5 pt-1 overscroll-x-contain [scrollbar-width:none] md:-mx-7 md:w-[calc(100%+3.5rem)] md:px-7 lg:gap-7 [&::-webkit-scrollbar]:hidden" layout>
         {imageDisplay.length
           ? [
               ...imageDisplay.map((image) => (
