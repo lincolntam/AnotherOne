@@ -6,7 +6,7 @@ import { HomeCarousel } from "@/components/home-carousel";
 export default function LtravelLogPage() {
   return (
     <AppShell websites={[]}>
-      <div className="-mt-2 mb-4 text-center">
+      <div className="mb-4 pt-1 text-center">
         <p className="text-[10px] font-bold uppercase tracking-[0.22em] text-graphite/45">Migration Room</p>
         <h1 className="mt-2 text-xl font-bold text-ink">LtravelLog</h1>
       </div>
