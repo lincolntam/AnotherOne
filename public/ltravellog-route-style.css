@@ -12,12 +12,12 @@
 
 @media (display-mode: standalone) {
     :root {
-        --pwa-search-lift: 16px;
+        --pwa-search-lift: 32px;
     }
 }
 
 html[data-standalone="true"] {
-    --pwa-search-lift: 16px;
+    --pwa-search-lift: 32px;
 }
 
 * { box-sizing: border-box; }
