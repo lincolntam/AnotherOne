@@ -84,16 +84,16 @@ export function LtravelLogFrame({
           <LeftContent activeId={activeId} />
         </aside>
 
-        <section className="relative h-full min-h-0 bg-white">
+        <section className="relative flex h-full min-h-0 flex-col bg-white">
           {showMap ? <LtravelLogMapBackground /> : null}
-          <div className={`relative z-10 lg:hidden ${hideMobileHeader ? "hidden" : ""}`}>
+          <div className={`relative z-10 shrink-0 lg:hidden ${hideMobileHeader ? "hidden" : ""}`}>
             <MobileHeader
               title={mobileTitle ?? "LTravelLog"}
               subtitle={mobileSubtitle ?? "AnotherOne"}
               backHref={activeId ? "/ltravellog/categories" : "/ltravellog"}
             />
           </div>
-          <div className="relative z-10">{right ?? children ?? <MobileToolList activeId={activeId} />}</div>
+          <div className="relative z-10 min-h-0 flex-1">{right ?? children ?? <MobileToolList activeId={activeId} />}</div>
         </section>
       </main>
     </AppShell>

@@ -1,4 +1,4 @@
-const CACHE_NAME = "anotherone-v14";
+const CACHE_NAME = "anotherone-v15";
 const IMAGE_CACHE = "anotherone-images-v12";
 const CORE_ASSETS = ["/offline.html", "/manifest.webmanifest", "/icons/icon.svg"];
 

@@ -19,7 +19,7 @@ export function LtravelLogToolShell({
       mobileTitle={title}
       mobileSubtitle={subtitle}
       right={
-        <section className="min-h-full bg-white px-5 pb-8 pt-7 lg:max-h-screen lg:overflow-y-auto lg:px-12 lg:pb-10 lg:pt-10 xl:px-20">
+        <section className="h-full min-h-0 overflow-y-auto overscroll-contain bg-white px-5 pb-8 pt-7 [-webkit-overflow-scrolling:touch] lg:px-12 lg:pb-10 lg:pt-10 xl:px-20">
           <div className="mx-auto max-w-2xl">
             <div className="mb-7 text-center lg:text-left">
               <p className="text-[10px] font-black uppercase tracking-[0.2em] text-graphite/40">LtravelLog</p>
