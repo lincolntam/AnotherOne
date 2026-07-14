@@ -33,6 +33,7 @@ export function AppShell({ children, websites = [], showBottomNav = true, showHe
     pathname.startsWith("/ltravellog/tunnel-fee");
   const pageScrollable = pathname.startsWith("/ltravellog/charging") ||
     pathname.startsWith("/ltravellog/tunnel-fee");
+  const homeScrollable = ["/home", "/secret", "/secret/anotherwm", "/ltravellog"].includes(pathname);
   const drawKey = getImageDrawKey(pathname);
 
   useEffect(() => {
@@ -83,11 +84,13 @@ export function AppShell({ children, websites = [], showBottomNav = true, showHe
 
   const animatedContent = (
     <motion.div
-      className={pageScrollable
-        ? "flex min-h-full w-full min-w-0 flex-none flex-col overflow-x-hidden"
-        : fullScreen
-          ? "flex h-full min-h-0 min-w-0 flex-1 overflow-x-hidden"
-          : "flex min-h-0 w-full min-w-0 flex-1 flex-col overflow-x-hidden overflow-y-auto overscroll-contain pb-28 [-webkit-overflow-scrolling:touch]"}
+      className={homeScrollable
+        ? "flex w-full min-w-0 flex-none flex-col overflow-x-hidden pb-40"
+        : pageScrollable
+          ? "flex min-h-full w-full min-w-0 flex-none flex-col overflow-x-hidden"
+          : fullScreen
+            ? "flex h-full min-h-0 min-w-0 flex-1 overflow-x-hidden"
+            : "flex min-h-0 w-full min-w-0 flex-1 flex-col overflow-x-hidden overflow-y-auto overscroll-contain pb-28 [-webkit-overflow-scrolling:touch]"}
       initial={{ opacity: 0, y: 16 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.28, ease: "easeOut" }}
@@ -99,8 +102,17 @@ export function AppShell({ children, websites = [], showBottomNav = true, showHe
   return (
     <main className="ao-shell">
       <section className={`ao-phone ${fullScreen ? "ao-phone-full" : ""} ${pageScrollable ? "ao-phone-page-scroll" : ""}`}>
-        {showHeader ? <Header onOpenSetting={() => setSettingOpen(true)} /> : null}
-        {animatedContent}
+        {homeScrollable ? (
+          <div className="flex min-h-0 w-full min-w-0 flex-1 flex-col overflow-x-hidden overflow-y-auto overscroll-contain [-webkit-overflow-scrolling:touch]">
+            {showHeader ? <Header onOpenSetting={() => setSettingOpen(true)} /> : null}
+            {animatedContent}
+          </div>
+        ) : (
+          <>
+            {showHeader ? <Header onOpenSetting={() => setSettingOpen(true)} /> : null}
+            {animatedContent}
+          </>
+        )}
         {showBottomNav ? <BottomNav /> : null}
         <SearchModal websites={websites} />
         <ImageDrawSettings drawKey={drawKey} open={settingOpen} onClose={() => setSettingOpen(false)} />
