@@ -84,7 +84,9 @@ export function AppShell({ children, websites = [], showBottomNav = true, showHe
       <section className={`ao-phone ${fullScreen ? "ao-phone-full" : ""}`}>
         {showHeader ? <Header onOpenSetting={() => setSettingOpen(true)} /> : null}
         <motion.div
-          className={fullScreen ? "flex h-full min-h-0 flex-1" : "flex min-h-0 flex-1 flex-col pb-28"}
+          className={fullScreen
+            ? "flex h-full min-h-0 flex-1"
+            : "flex min-h-0 flex-1 flex-col overflow-y-auto overscroll-contain pb-28 [-webkit-overflow-scrolling:touch]"}
           initial={{ opacity: 0, y: 16 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.28, ease: "easeOut" }}
