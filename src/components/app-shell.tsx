@@ -101,7 +101,7 @@ export function AppShell({ children, websites = [], showBottomNav = true, showHe
 
   return (
     <main className="ao-shell">
-      <section className={`ao-phone ${fullScreen ? "ao-phone-full" : ""} ${pageScrollable ? "ao-phone-page-scroll" : ""}`}>
+      <section className={`ao-phone ${homeScrollable ? "ao-phone-home" : ""} ${fullScreen ? "ao-phone-full" : ""} ${pageScrollable ? "ao-phone-page-scroll" : ""}`}>
         {homeScrollable ? (
           <div className="flex min-h-0 w-full min-w-0 flex-1 flex-col overflow-x-hidden overflow-y-auto overscroll-contain [-webkit-overflow-scrolling:touch]">
             {showHeader ? <Header onOpenSetting={() => setSettingOpen(true)} /> : null}

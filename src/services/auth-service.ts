@@ -19,7 +19,39 @@ type SessionRow = {
   expires_at: string;
 };
 
+const localDebugSessionToken = "anotherone-local-debug-session";
+
+function localDebugUser(): AppUser {
+  return {
+    id: "local-debug-admin",
+    email: normalizeEmail(process.env.DEV_LOGIN_EMAIL || "lincolntam56@hotmail.com"),
+    name: "Lincoln",
+    avatarUrl: null,
+    role: "admin",
+    createdAt: "2026-07-15T00:00:00.000Z",
+    active: true
+  };
+}
+
+function isLocalDebugMode() {
+  return process.env.NODE_ENV === "development" && Boolean(process.env.DEV_LOGIN_PASSWORD);
+}
+
+function isLocalDebugLogin(email: string, password: string) {
+  const user = localDebugUser();
+  return isLocalDebugMode() && normalizeEmail(email) === user.email && password === process.env.DEV_LOGIN_PASSWORD;
+}
+
+function isLocalDebugSession(token: string) {
+  return isLocalDebugMode() && token === localDebugSessionToken;
+}
+
 export async function loginWithPassword(email: string, password: string, remember: boolean) {
+  if (isLocalDebugLogin(email, password)) {
+    await setSessionCookie(localDebugSessionToken, remember);
+    return { data: localDebugUser() };
+  }
+
   const db = getDb();
   const row = await db
     .prepare("select * from ao_users_view where lower(email) = ? and active = 1 limit 1")
@@ -52,6 +84,8 @@ export async function getCurrentUser() {
   const token = await getSessionToken();
   if (!token) return null;
 
+  if (isLocalDebugSession(token)) return localDebugUser();
+
   const db = getDb();
   const tokenHash = await sha256(token);
   const session = await db
@@ -82,6 +116,11 @@ export async function requireAdmin() {
 
 export async function logout() {
   const token = await getSessionToken();
+  if (token && isLocalDebugSession(token)) {
+    await clearSessionCookie();
+    return;
+  }
+
   if (token) {
     const db = getDb();
     await db.prepare("delete from user_sessions where token_hash = ?").bind(await sha256(token)).run();

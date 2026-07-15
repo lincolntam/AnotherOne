@@ -1,35 +1,35 @@
 export const FUEL_CAR_COST_PER_KM = 2.25;
 
 export const chargingPlans = [
-  { id: "home-off-peak", label: "Home off-peak", efficiency: 0.16, rate: 1.343 },
-  { id: "home-peak", label: "Home peak", efficiency: 0.16, rate: 1.773 },
-  { id: "tesla-supercharge", label: "Tesla Supercharge", efficiency: 0.16, rate: 2.43 }
+  { id: "home-off-peak", label: "家用電 非繁忙時段", efficiency: 0.16, rate: 1.343 },
+  { id: "home-peak", label: "家用電 繁忙時段", efficiency: 0.16, rate: 1.773 },
+  { id: "tesla-supercharge", label: "Tesla 超級充電", efficiency: 0.16, rate: 2.43 }
 ] as const;
 
 export const fixedTunnels = [
-  { id: "aberdeen", name: "Aberdeen Tunnel", fee: 8, rule: "Fixed toll" },
-  { id: "shing-mun", name: "Shing Mun Tunnels", fee: 8, rule: "Fixed toll" },
-  { id: "lion-rock", name: "Lion Rock Tunnel", fee: 8, rule: "Fixed toll" },
-  { id: "eagles-nest", name: "Eagle's Nest / Sha Tin Heights / Tai Wai Tunnel", fee: 8, rule: "Fixed toll" },
-  { id: "tates-cairn", name: "Tate's Cairn Tunnel", fee: 20, rule: "Fixed toll" },
-  { id: "discovery-bay", name: "Discovery Bay Tunnel Link", fee: 250, rule: "One-way to Discovery Bay" }
+  { id: "aberdeen", name: "香港仔隧道", fee: 8, rule: "固定收費" },
+  { id: "shing-mun", name: "城門隧道", fee: 8, rule: "固定收費" },
+  { id: "lion-rock", name: "獅子山隧道", fee: 8, rule: "固定收費" },
+  { id: "eagles-nest", name: "尖山／沙田嶺／大圍隧道", fee: 8, rule: "固定收費" },
+  { id: "tates-cairn", name: "大老山隧道", fee: 20, rule: "固定收費" },
+  { id: "discovery-bay", name: "愉景灣隧道連接路", fee: 250, rule: "前往愉景灣單程" }
 ] as const;
 
 export const tunnelOptions = [
-  { id: "auto", name: "Auto detect", kind: "auto", fee: 0 },
-  { id: "none", name: "No tunnel", kind: "fixed", fee: 0 },
-  { id: "western", name: "Western Harbour Crossing", kind: "harbour" },
-  { id: "cross-harbour", name: "Cross-Harbour Tunnel", kind: "harbour" },
-  { id: "eastern", name: "Eastern Harbour Crossing", kind: "harbour" },
-  { id: "tai-lam", name: "Tai Lam Tunnel", kind: "tai-lam" },
+  { id: "auto", name: "自動偵測", kind: "auto", fee: 0 },
+  { id: "none", name: "不使用隧道", kind: "fixed", fee: 0 },
+  { id: "western", name: "西區海底隧道", kind: "harbour" },
+  { id: "cross-harbour", name: "海底隧道", kind: "harbour" },
+  { id: "eastern", name: "東區海底隧道", kind: "harbour" },
+  { id: "tai-lam", name: "大欖隧道", kind: "tai-lam" },
   ...fixedTunnels.map((tunnel) => ({ id: tunnel.id, name: tunnel.name, kind: "fixed", fee: tunnel.fee }))
 ] as const;
 
 export const zoneOneChargingSlots = [
-  { startDay: 1, startTime: "00:00", endDay: 1, endTime: "11:59", label: "Monday 00:00 to 11:59 (special)" },
-  { startDay: 2, startTime: "12:00", endDay: 3, endTime: "11:59", label: "Tuesday 12:00 to Wednesday 11:59" },
-  { startDay: 4, startTime: "12:00", endDay: 5, endTime: "11:59", label: "Thursday 12:00 to Friday 11:59" },
-  { startDay: 6, startTime: "12:00", endDay: 0, endTime: "11:59", label: "Saturday 12:00 to Sunday 11:59" }
+  { startDay: 1, startTime: "00:00", endDay: 1, endTime: "11:59", label: "星期一 00:00 至 11:59（特別時段）" },
+  { startDay: 2, startTime: "12:00", endDay: 3, endTime: "11:59", label: "星期二 12:00 至星期三 11:59" },
+  { startDay: 4, startTime: "12:00", endDay: 5, endTime: "11:59", label: "星期四 12:00 至星期五 11:59" },
+  { startDay: 6, startTime: "12:00", endDay: 0, endTime: "11:59", label: "星期六 12:00 至星期日 11:59" }
 ] as const;
 
 export type LatLngPoint = {
@@ -66,14 +66,14 @@ const hkGeneralHolidays2026 = new Set([
 ]);
 
 const routeTunnelDetectors = [
-  { id: "western", name: "Western Harbour Crossing", points: [{ lat: 22.297361, lng: 114.153278 }, { lat: 22.297139, lng: 114.152917 }], radius: 520 },
-  { id: "cross-harbour", name: "Cross-Harbour Tunnel", points: [{ lat: 22.289806, lng: 114.182389 }, { lat: 22.29, lng: 114.182222 }], radius: 520 },
-  { id: "eastern", name: "Eastern Harbour Crossing", points: [{ lat: 22.296139, lng: 114.224833 }, { lat: 22.295944, lng: 114.224222 }], radius: 520 },
-  { id: "tai-lam", name: "Tai Lam Tunnel", points: [{ lat: 22.387111, lng: 114.062722 }], radius: 520 },
-  { id: "lion-rock", name: "Lion Rock Tunnel", points: [{ lat: 22.351611, lng: 114.177389 }, { lat: 22.351194, lng: 114.177056 }], radius: 420 },
-  { id: "tates-cairn", name: "Tate's Cairn Tunnel", points: [{ lat: 22.358444, lng: 114.210583 }, { lat: 22.359, lng: 114.210333 }], radius: 420 },
-  { id: "eagles-nest", name: "Eagle's Nest / Sha Tin Heights / Tai Wai Tunnel", points: [{ lat: 22.351722, lng: 114.158889 }, { lat: 22.351611, lng: 114.158222 }], radius: 120 },
-  { id: "shing-mun", name: "Shing Mun Tunnels", points: [{ lat: 22.37625, lng: 114.150528 }, { lat: 22.376611, lng: 114.150361 }], radius: 420 }
+  { id: "western", name: "西區海底隧道", points: [{ lat: 22.297361, lng: 114.153278 }, { lat: 22.297139, lng: 114.152917 }], radius: 520 },
+  { id: "cross-harbour", name: "海底隧道", points: [{ lat: 22.289806, lng: 114.182389 }, { lat: 22.29, lng: 114.182222 }], radius: 520 },
+  { id: "eastern", name: "東區海底隧道", points: [{ lat: 22.296139, lng: 114.224833 }, { lat: 22.295944, lng: 114.224222 }], radius: 520 },
+  { id: "tai-lam", name: "大欖隧道", points: [{ lat: 22.387111, lng: 114.062722 }], radius: 520 },
+  { id: "lion-rock", name: "獅子山隧道", points: [{ lat: 22.351611, lng: 114.177389 }, { lat: 22.351194, lng: 114.177056 }], radius: 420 },
+  { id: "tates-cairn", name: "大老山隧道", points: [{ lat: 22.358444, lng: 114.210583 }, { lat: 22.359, lng: 114.210333 }], radius: 420 },
+  { id: "eagles-nest", name: "尖山／沙田嶺／大圍隧道", points: [{ lat: 22.351722, lng: 114.158889 }, { lat: 22.351611, lng: 114.158222 }], radius: 120 },
+  { id: "shing-mun", name: "城門隧道", points: [{ lat: 22.37625, lng: 114.150528 }, { lat: 22.376611, lng: 114.150361 }], radius: 420 }
 ];
 
 const weekMs = 7 * 24 * 60 * 60 * 1000;
@@ -91,15 +91,15 @@ export function getTunnelFee(tunnelId: string, date = new Date()): TollResult {
   const tunnel = tunnelOptions.find((item) => item.id === tunnelId) ?? tunnelOptions[0];
   if (tunnel.kind === "harbour") return harbourFee(tunnel.id, date);
   if (tunnel.kind === "tai-lam") return taiLamFee(date);
-  return { fee: "fee" in tunnel ? tunnel.fee : 0, rule: tunnel.id === "none" ? "No tunnel selected" : "Fixed toll" };
+  return { fee: "fee" in tunnel ? tunnel.fee : 0, rule: tunnel.id === "none" ? "未選擇隧道" : "固定收費" };
 }
 
 export function getCurrentTunnelFees(date = new Date()) {
   return [
-    { name: "Western Harbour Crossing", ...harbourFee("western", date) },
-    { name: "Cross-Harbour Tunnel", ...harbourFee("cross-harbour", date) },
-    { name: "Eastern Harbour Crossing", ...harbourFee("eastern", date) },
-    { name: "Tai Lam Tunnel", ...taiLamFee(date) },
+    { name: "西區海底隧道", ...harbourFee("western", date) },
+    { name: "海底隧道", ...harbourFee("cross-harbour", date) },
+    { name: "東區海底隧道", ...harbourFee("eastern", date) },
+    { name: "大欖隧道", ...taiLamFee(date) },
     ...fixedTunnels.map((item) => ({ name: item.name, fee: item.fee, rule: item.rule }))
   ];
 }
@@ -122,8 +122,8 @@ export function describeChargingSlot(now = new Date()) {
   if (activeSlot) {
     return {
       active: true,
-      title: "Available now",
-      body: `Zone 1 is powered until ${formatDateTime(activeSlot.end)}.`,
+      title: "現正供電",
+      body: `Zone 1 將供電至 ${formatDateTime(activeSlot.end)}。`,
       meta: activeSlot.label
     };
   }
@@ -131,7 +131,7 @@ export function describeChargingSlot(now = new Date()) {
   const nextSlot = slots.find((slot) => slot.start > now) ?? slots[0];
   return {
     active: false,
-    title: "Next charging slot",
+    title: "下一個充電時段",
     body: `${formatDateTime(nextSlot.start)} to ${formatDateTime(nextSlot.end)}`,
     meta: nextSlot.label
   };
@@ -224,41 +224,41 @@ function harbourFee(tunnelId: string, date: Date): TollResult {
   const m = minutesOfDay(date);
   const west = tunnelId === "western";
   if (isSundayOrHoliday(date)) {
-    if (m <= 610) return { fee: 20, rule: "Holiday off-peak" };
-    if (m <= 614) return { fee: transition(m, 611, 21, 2), rule: "Holiday transition" };
-    if (m <= 1154) return { fee: 25, rule: "Holiday standard" };
-    if (m <= 1158) return { fee: transition(m, 1155, 23, -2), rule: "Holiday transition" };
-    return { fee: 20, rule: "Holiday off-peak" };
+    if (m <= 610) return { fee: 20, rule: "假日非繁忙時段" };
+    if (m <= 614) return { fee: transition(m, 611, 21, 2), rule: "假日過渡時段" };
+    if (m <= 1154) return { fee: 25, rule: "假日標準時段" };
+    if (m <= 1158) return { fee: transition(m, 1155, 23, -2), rule: "假日過渡時段" };
+    return { fee: 20, rule: "假日非繁忙時段" };
   }
-  if (m <= 449) return { fee: 20, rule: "Off-peak" };
-  if (west && m <= 487) return { fee: transition(m, 450, 22, 2), rule: "Morning transition" };
-  if (!west && m <= 467) return { fee: transition(m, 450, 22, 2), rule: "Morning transition" };
-  if (west && m <= 614) return { fee: 60, rule: "Morning peak" };
-  if (!west && m <= 614) return { fee: 40, rule: "Morning peak" };
-  if (west && m <= 642) return { fee: transition(m, 615, 58, -2), rule: "Day transition" };
-  if (!west && m <= 622) return { fee: transition(m, 615, 38, -2), rule: "Day transition" };
-  if (m <= 989) return { fee: 30, rule: "Standard" };
-  if (west && m <= 1017) return { fee: transition(m, 990, 32, 2), rule: "Evening transition" };
-  if (!west && m <= 997) return { fee: transition(m, 990, 32, 2), rule: "Evening transition" };
-  if (west && m <= 1139) return { fee: 60, rule: "Evening peak" };
-  if (!west && m <= 1139) return { fee: 40, rule: "Evening peak" };
-  if (west && m <= 1177) return { fee: transition(m, 1140, 58, -2), rule: "Night transition" };
-  if (!west && m <= 1157) return { fee: transition(m, 1140, 38, -2), rule: "Night transition" };
-  return { fee: 20, rule: "Off-peak" };
+  if (m <= 449) return { fee: 20, rule: "非繁忙時段" };
+  if (west && m <= 487) return { fee: transition(m, 450, 22, 2), rule: "早上過渡時段" };
+  if (!west && m <= 467) return { fee: transition(m, 450, 22, 2), rule: "早上過渡時段" };
+  if (west && m <= 614) return { fee: 60, rule: "早上繁忙時段" };
+  if (!west && m <= 614) return { fee: 40, rule: "早上繁忙時段" };
+  if (west && m <= 642) return { fee: transition(m, 615, 58, -2), rule: "日間過渡時段" };
+  if (!west && m <= 622) return { fee: transition(m, 615, 38, -2), rule: "日間過渡時段" };
+  if (m <= 989) return { fee: 30, rule: "標準時段" };
+  if (west && m <= 1017) return { fee: transition(m, 990, 32, 2), rule: "傍晚過渡時段" };
+  if (!west && m <= 997) return { fee: transition(m, 990, 32, 2), rule: "傍晚過渡時段" };
+  if (west && m <= 1139) return { fee: 60, rule: "傍晚繁忙時段" };
+  if (!west && m <= 1139) return { fee: 40, rule: "傍晚繁忙時段" };
+  if (west && m <= 1177) return { fee: transition(m, 1140, 58, -2), rule: "晚間過渡時段" };
+  if (!west && m <= 1157) return { fee: transition(m, 1140, 38, -2), rule: "晚間過渡時段" };
+  return { fee: 20, rule: "非繁忙時段" };
 }
 
 function taiLamFee(date: Date): TollResult {
   const m = minutesOfDay(date);
-  if (isSundayOrHoliday(date)) return { fee: 18, rule: "Holiday fixed" };
-  if (m <= 434) return { fee: 18, rule: "Off-peak" };
-  if (m <= 460) return { fee: transition(m, 435, 19, 2), rule: "Morning transition" };
-  if (m <= 584) return { fee: 45, rule: "Morning peak" };
-  if (m <= 598) return { fee: transition(m, 585, 43, -2), rule: "Day transition" };
-  if (m <= 1034) return { fee: 30, rule: "Standard" };
-  if (m <= 1048) return { fee: transition(m, 1035, 31, 2), rule: "Evening transition" };
-  if (m <= 1139) return { fee: 45, rule: "Evening peak" };
-  if (m <= 1165) return { fee: transition(m, 1140, 43, -2), rule: "Night transition" };
-  return { fee: 18, rule: "Off-peak" };
+  if (isSundayOrHoliday(date)) return { fee: 18, rule: "假日固定收費" };
+  if (m <= 434) return { fee: 18, rule: "非繁忙時段" };
+  if (m <= 460) return { fee: transition(m, 435, 19, 2), rule: "早上過渡時段" };
+  if (m <= 584) return { fee: 45, rule: "早上繁忙時段" };
+  if (m <= 598) return { fee: transition(m, 585, 43, -2), rule: "日間過渡時段" };
+  if (m <= 1034) return { fee: 30, rule: "標準時段" };
+  if (m <= 1048) return { fee: transition(m, 1035, 31, 2), rule: "傍晚過渡時段" };
+  if (m <= 1139) return { fee: 45, rule: "傍晚繁忙時段" };
+  if (m <= 1165) return { fee: transition(m, 1140, 43, -2), rule: "晚間過渡時段" };
+  return { fee: 18, rule: "非繁忙時段" };
 }
 
 function distanceMeters(a: LatLngPoint, b: LatLngPoint) {
